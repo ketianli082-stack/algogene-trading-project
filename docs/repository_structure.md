@@ -6,44 +6,30 @@ algogene-trading-project/
 ├── CONTRIBUTING.md
 ├── .gitignore
 ├── docs/
-│   ├── execution_plan.md
-│   ├── team_roles.md
-│   ├── repository_structure.md
+│   ├── execution_plan.md           # 全过程
+│   ├── teacher_questions.md        # 28 题、负责人和证据状态
+│   ├── team_roles.md               # 任务及交接
+│   ├── platform_capabilities.md    # C 汇总，A/B 提供专业输入
+│   ├── strategy_spec.md            # A
+│   ├── risk_capital_spec.md        # B
 │   └── decisions.md
-├── src/                 # ALGOGENE 策略代码，A 主责
-├── configs/             # 参数、样本、成本及风险设置，A/B 核对
-├── analysis/            # 指标计算与图表程序，B 主责
-├── experiments/
-│   ├── experiment_log.csv
-│   └── README.md        # 单次实验规范
-├── results_summary/     # 可公开的小型汇总及图表
-├── report/              # 章节提纲与公开证据索引
-└── .github/
-    └── pull_request_template.md
+├── src/                           # A：完整策略
+├── configs/                       # A：实现配置，采用 B 的政策和 C 的实验设置
+├── analysis/                      # C：绩效程序；B：风险资金程序
+├── experiments/                   # C：计划、登记、可公开实验说明
+├── results_summary/               # 各人保存有来源的可公开汇总
+├── report/                        # 六个章节按负责人分开
+└── .github/pull_request_template.md
 ```
 
-## 仓库与共享空间的边界
+## 数据交流
 
-| 内容 | 正式存放位置 | 规则 |
-| --- | --- | --- |
-| 规格、代码、配置、研究记录 | GitHub | 分支修改，复核后合并 |
-| 大型原始行情及完整运行输出 | 团队受限共享空间 | 保留原始副本；遵守课程授权 |
-| 共同编辑的 Word 报告 | 团队受限共享空间 | 唯一主文档，评论与修订 |
-| 小型实验汇总 | GitHub | 先检查公开权限及敏感信息 |
-| 最终提交文件与凭证 | 团队受限共享空间 | 冻结发布包，防止误公开 |
+平台原始数据共享字典、覆盖、获取方法和处理规则，不强制导出整套行情。完整回测包保存在团队受限空间，包含平台可提供的代码快照、配置、净值、交易、日志、ID 及说明。不能导出的项目先测试回调记录；仍不可得则说明限制。
 
-README 文件用于保留目录并说明职责。尚未编写的策略、参数或分析程序不创建伪实现。
+公开仓库只放获准公开内容。不放个人身份、账户私密资料、课程受限数据及私人分享链接。报告主文档及最终提交凭证放受限共享空间。
 
-## 单次实验结果包
+## 交接和追溯
 
-完整结果包建议包含 notes.md、strategy.py、settings.json、daily_equity.csv、trades.csv、summary.csv、logs.txt 和 screenshots/。按平台实际输出调整，缺失内容在 notes.md 说明。
+A 给 C 准确运行代码与配置；C 给 B 结果、字段及口径；B 给 A 风控规格，给 C 资金规模和杠杆结论；三人给 C 自己写完的报告章节。每份成果标明负责人、任务/问题 ID、版本、来源和未确定事项。
 
-公开仓库默认只保留实验登记和经确认可公开的汇总。完整包以实验 ID 存放在受限空间，公开索引使用内部位置编号，不放公开可访问的私密分享链接。
-
-## 追溯要求
-
-每次正式运行记录运行前的准确代码提交编号及配置文件路径。提交编号指向运行使用的代码，不能只填写后来上传结果的提交。若平台内另行修改代码，先保存对应修改再登记，或明确说明差异。
-
-## 命名
-
-实验使用 EXP001、EXP002 等唯一编号。图表名称包含实验编号及内容，如 EXP007_drawdown.png。最终发布使用明确版本标记，不使用“最终版2”“最终最终版”等名称。
+正式运行记录运行前准确代码提交，不能只填之后上传结果的提交。实验使用 EXP001 等唯一编号，不覆盖旧记录；最终代码、配置、报告与 Backtest ID 固定对应。
