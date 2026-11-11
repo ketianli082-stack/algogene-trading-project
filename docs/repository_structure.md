@@ -11,9 +11,9 @@ algogene-trading-project/
 │   ├── team_roles.md               # 任务及交接
 │   ├── platform_capabilities.md    # C 汇总，A/B 提供专业输入
 │   ├── strategy_spec.md            # A
-│   ├── risk_capital_spec.md        # B
+│   ├── risk_capital_spec.md        # B：规则及模块接口
 │   └── decisions.md
-├── src/                           # A：完整策略
+├── src/                           # A：交易核心和整合；risk/ 由 B 制作
 ├── configs/                       # A：实现配置，采用 B 的政策和 C 的实验设置
 ├── analysis/                      # C：绩效程序；B：风险资金程序
 ├── experiments/                   # C：计划、登记、可公开实验说明
@@ -30,6 +30,6 @@ algogene-trading-project/
 
 ## 交接和追溯
 
-A 给 C 准确运行代码与配置；C 给 B 结果、字段及口径；B 给 A 风控规格，给 C 资金规模和杠杆结论；三人给 C 自己写完的报告章节。每份成果标明负责人、任务/问题 ID、版本、来源和未确定事项。
+A 给 C 准确运行代码与配置；C 给各人统一输出、字段及口径；B 给 A 可接入风险仓位模块和规格，给 C 资金规模和杠杆结论；三人给 C 自己写完的报告章节。每份成果标明负责人、任务/问题 ID、版本、来源和未确定事项。
 
 正式运行记录运行前准确代码提交，不能只填之后上传结果的提交。实验使用 EXP001 等唯一编号，不覆盖旧记录；最终代码、配置、报告与 Backtest ID 固定对应。
