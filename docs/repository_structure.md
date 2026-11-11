@@ -1,35 +1,33 @@
-# 目录及文件存放规范
+# 目录与阶段
 
 ```text
 algogene-trading-project/
 ├── README.md
 ├── CONTRIBUTING.md
-├── .gitignore
 ├── docs/
-│   ├── execution_plan.md           # 全过程
-│   ├── teacher_questions.md        # 28 题、负责人和证据状态
-│   ├── team_roles.md               # 任务及交接
-│   ├── platform_capabilities.md    # C 汇总，A/B 提供专业输入
-│   ├── strategy_spec.md            # A
-│   ├── risk_capital_spec.md        # B：规则及模块接口
+│   ├── meeting_2026-11-11.md    # 今晚议程与待填写决定
+│   ├── candidate_protocol.md   # 统一候选交付、比较和测试纪律
+│   ├── team_roles.md           # 前期各自完整，后期重新分工
+│   ├── execution_plan.md
+│   ├── teacher_questions.md    # 28 题
+│   ├── platform_capabilities.md
+│   ├── strategy_spec.md        # 后期 S
+│   ├── risk_capital_spec.md    # 后期 R
 │   └── decisions.md
-├── src/                           # A：交易核心和整合；risk/ 由 B 制作
-├── configs/                       # A：实现配置，采用 B 的政策和 C 的实验设置
-├── analysis/                      # C：绩效程序；B：风险资金程序
-├── experiments/                   # C：计划、登记、可公开实验说明
-├── results_summary/               # 各人保存有来源的可公开汇总
-├── report/                        # 六个章节按负责人分开
-└── .github/pull_request_template.md
+├── candidates/
+│   ├── member_a/               # A 的完整基础版本
+│   ├── member_b/               # B 的完整基础版本
+│   └── member_c/               # C 的完整基础版本
+├── src/                        # 选型后主策略，S 整合，R 做 risk/
+├── configs/                    # 选型后正式配置
+├── analysis/                   # 主策略绩效与风险资金分析
+├── experiments/               # 主策略及共同实验索引
+├── results_summary/            # 可公开汇总
+└── report/                     # 选型后六章正文，S/R/E 各两章
 ```
 
-## 数据交流
+每个候选作者保存说明、真实实现后加入的脚本和配置、实验登记和开发结果。初始没有伪造策略或输出。正式运行记录运行前代码提交编号，结果上传后的编号不能替代它。
 
-平台原始数据共享字典、覆盖、获取方法和处理规则，不强制导出整套行情。完整回测包保存在团队受限空间，包含平台可提供的代码快照、配置、净值、交易、日志、ID 及说明。不能导出的项目先测试回调记录；仍不可得则说明限制。
+公开仓库不放身份、密码、私密账户、未经授权行情、完整大型日志或私人分享链接；这些存团队受限空间。平台不能导出数据时先试记录，不补造。
 
-公开仓库只放获准公开内容。不放个人身份、账户私密资料、课程受限数据及私人分享链接。报告主文档及最终提交凭证放受限共享空间。
-
-## 交接和追溯
-
-A 给 C 准确运行代码与配置；C 给各人统一输出、字段及口径；B 给 A 可接入风险仓位模块和规格，给 C 资金规模和杠杆结论；三人给 C 自己写完的报告章节。每份成果标明负责人、任务/问题 ID、版本、来源和未确定事项。
-
-正式运行记录运行前准确代码提交，不能只填之后上传结果的提交。实验使用 EXP001 等唯一编号，不覆盖旧记录；最终代码、配置、报告与 Backtest ID 固定对应。
+选型后保留原候选版本，集中完善一套主策略。S/R/E 是后期职责而非固定 A/B/C。代码整合与报告整合均不代替其他人的研究。
