@@ -32,6 +32,7 @@ def main():
     last_call = [0.0]
 
     def call(path, params, post=False):
+        result["last_endpoint"] = path
         delay = 61 - (time.monotonic() - last_call[0])
         if delay > 0:
             time.sleep(delay)
@@ -43,8 +44,16 @@ def main():
             headers={"Content-Type": "application/json"},
             method="POST" if post else "GET",
         )
-        with urllib.request.urlopen(request, timeout=45) as response:
-            return json.load(response)
+        try:
+            with urllib.request.urlopen(request, timeout=45) as response:
+                return json.load(response)
+        except urllib.error.HTTPError as exc:
+            message = exc.read().decode("utf-8", errors="replace")[:2000]
+            for secret in (key, user):
+                if secret:
+                    message = message.replace(secret, "[REDACTED]")
+            result["http_error"] = {"endpoint": path, "status": exc.code, "message": message}
+            raise
 
     if not user or not key:
         result["reason"] = "Required GitHub Secrets unavailable: ALGOGENE_USER_ID / ALGOGENE_API_KEY"

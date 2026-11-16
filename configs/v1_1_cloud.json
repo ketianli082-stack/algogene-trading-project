@@ -1,5 +1,5 @@
 {
-  "strategyName": "V1.1 EMA200 Donchian20 Development",
+  "strategyName": "V1.1 EMA200 Donchian20 Development attempt2",
   "subscribeList": ["BTCUSD"],
   "StartDate": "2021-01",
   "EndDate": "2023-12",
