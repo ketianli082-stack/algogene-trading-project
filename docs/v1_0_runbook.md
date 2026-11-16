@@ -2,6 +2,8 @@
 
 Status date: 2026-11-16 (HKT)
 
+Current execution: use `configs/v1_0_cloud.json` and `docs/research_protocol.md`. The January 2021 cloud test passed, recorded in EXP-004. The original UI procedure below is historical guidance and its old date range is superseded by the research protocol.
+
 ## Scope
 
 V1.0 is a deliberately small platform compatibility test, not a performance strategy. It verifies that the selected ALGOGENE account can:

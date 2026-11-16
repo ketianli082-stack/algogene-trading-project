@@ -2,7 +2,7 @@
 
 Active research design: **2021–2023 Development, 2024 Validation, 2025 Final Test**. V1.0–V1.4 are iterative strategy versions. See the controlling [research protocol](docs/research_protocol.md) and [machine-readable windows](configs/research_windows.json). V1.0 is being rerun on January 2021 with effective-date verification.
 
-Current status: **January 2021 V1.0 Development cloud run in progress** (2026-11-16 HKT). Only effective-period-verified runs qualify for the research result tables.
+Current status: **V1.0 January 2021 Development functional test passed** (2026-11-16 HKT). Backtest ID `20261116_102901_961717`; platform P/L +1.291985 USD. See [EXP-004](experiments/EXP-004-v1.0-development.md). Annual strategy returns remain NOT RUN.
 
 The controlling deliverable is the user's current ALGOGENE official scoring template. Older repository plans, dates, candidate-team divisions, and research-stage assignments are retained as historical context only; they do not constrain current execution.
 
