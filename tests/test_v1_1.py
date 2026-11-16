@@ -44,3 +44,20 @@ class TrendTest(unittest.TestCase):
         algo.on_marketdatafeed(SimpleNamespace(instrument="BTCUSD", timestamp=datetime(2021, 1, 1)), {})
         self.assertTrue(algo.halted)
         self.assertEqual(algo.evt.orders, [])
+
+    def test_current_and_future_bars_are_not_used_for_signals(self):
+        now = datetime(2021, 1, 1)
+        FakeHandler.history_response = {
+            now - timedelta(hours=4*i): self.bar for i in range(1, 202)
+        }
+        spike = {"o": 100, "h": 10000, "l": 100, "c": 10000}
+        FakeHandler.history_response[now] = spike
+        FakeHandler.history_response[now + timedelta(hours=4)] = spike
+        algo = self.module.AlgoEvent()
+        algo.start({"subscribeList": ["BTCUSD"]})
+        from types import SimpleNamespace
+        algo.on_marketdatafeed(SimpleNamespace(instrument="BTCUSD", timestamp=now), {})
+        self.assertFalse(algo.halted)
+        self.assertEqual(algo.trend.last_time, now - timedelta(hours=4))
+        self.assertEqual(algo.trend.ema, 100)
+        self.assertEqual(algo.evt.orders, [])

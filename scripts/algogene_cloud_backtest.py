@@ -78,6 +78,11 @@ def main():
             "settings": settings,
         }, post=True)
         if submitted.get("status") is not True:
+            message = str(submitted.get("res", submitted.get("msg", "No error detail returned")))[:2000]
+            for secret in (key, user):
+                if secret:
+                    message = message.replace(secret, "[REDACTED]")
+            result["submission_message"] = message
             result.update(status="FAIL", reason="Platform rejected backtest submission")
             save()
             return 1
