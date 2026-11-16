@@ -1,8 +1,8 @@
 {
-  "strategyName": "Crypto V1.0 API smoke",
+  "strategyName": "Crypto V1.0 Development 2021-01",
   "subscribeList": ["BTCUSD"],
-  "StartDate": "2026-10",
-  "EndDate": "2026-10",
+  "StartDate": "2021-01",
+  "EndDate": "2021-01",
   "InitialCapital": 10000,
   "BaseCurrency": "USD",
   "risk_free": 0,

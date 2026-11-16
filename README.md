@@ -1,5 +1,7 @@
 # ALGOGENE Crypto strategy project
 
+Active research design: **2021–2023 Development, 2024 Validation, 2025 Final Test**. V1.0–V1.4 are iterative strategy versions. See the controlling [research protocol](docs/research_protocol.md) and [machine-readable windows](configs/research_windows.json). V1.0 is being rerun on January 2021 with effective-date verification; earlier accidental December 2025 exposure is disclosed and excluded from tuning.
+
 Current status: **V1.0 cloud backtest completed: history read and one buy/close round trip confirmed; P/L -34.11 USD** (2026-11-16 HKT). Backtest ID `20261116_101506_803491`; see [EXP-003 evidence and limitations](experiments/EXP-003-cloud-v1.0-result.md).
 
 The controlling deliverable is the user's current ALGOGENE official scoring template. Older repository plans, dates, candidate-team divisions, and research-stage assignments are retained as historical context only; they do not constrain current execution.

@@ -20,13 +20,14 @@ def main():
     user = os.environ.get("ALGOGENE_USER_ID", "").strip()
     key = os.environ.get("ALGOGENE_API_KEY", "").strip()
     result = {"status": "NOT RUN", "backtest_id": None, "task_id": None,
-              "code_commit": os.environ.get("GITHUB_SHA"), "observations": []}
+              "code_commit": os.environ.get("GITHUB_SHA"), "observations": [],
+              "data_role": "Development", "version": "V1.0"}
 
     def save():
         output = ROOT / "outputs" / "cloud-backtest.json"
         output.parent.mkdir(exist_ok=True)
         output.write_text(json.dumps(result, indent=2), encoding="utf-8")
-        print(json.dumps(result))
+        print(json.dumps(result), flush=True)
 
     last_call = [0.0]
 
@@ -84,8 +85,21 @@ def main():
                 values = stats.get("performance", {})
                 if isinstance(values, dict):
                     result["metrics"] = {k: values[k] for k in ("TradeCnt", "TotalPnL", "DailySharpe") if k in values and isinstance(values[k], (int, float))}
+                effective = stats.get("settings", stats.get("setting", {}))
+                result["effective_settings"] = {k: effective.get(k) for k in settings}
+                matches = all(str(effective.get(k)) == str(settings[k]) for k in ("StartDate", "EndDate"))
+                result["period_matches_request"] = matches
+                if not matches:
+                    result["status"] = "INVALID_PERIOD"
+                    result["reason"] = "Platform effective dates differ from requested Development dates; exclude performance from research"
+                logs = call("/strategy_logs", {"runmode": "backtest", "runtime_id": result["backtest_id"]})
+                messages = str(logs.get("res", ""))
+                for secret in (key, user):
+                    if secret:
+                        messages = messages.replace(secret, "[REDACTED]")
+                result["platform_logs"] = messages
                 save()
-                return 0
+                return 0 if matches else 1
         result["status"] = "PENDING"
     except Exception as exc:
         result.update(status="ERROR", reason=type(exc).__name__)
