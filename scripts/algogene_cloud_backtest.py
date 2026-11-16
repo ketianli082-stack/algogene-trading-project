@@ -33,10 +33,6 @@ def main():
 
     def call(path, params, post=False):
         result["last_endpoint"] = path
-        delay = 61 - (time.monotonic() - last_call[0])
-        if delay > 0:
-            time.sleep(delay)
-        last_call[0] = time.monotonic()
         data = dict(params, user=user, api_key=key)
         request = urllib.request.Request(
             BASE + path if post else BASE + path + "?" + urllib.parse.urlencode(data),
@@ -44,16 +40,33 @@ def main():
             headers={"Content-Type": "application/json"},
             method="POST" if post else "GET",
         )
-        try:
-            with urllib.request.urlopen(request, timeout=45) as response:
-                return json.load(response)
-        except urllib.error.HTTPError as exc:
-            message = exc.read().decode("utf-8", errors="replace")[:2000]
-            for secret in (key, user):
-                if secret:
-                    message = message.replace(secret, "[REDACTED]")
-            result["http_error"] = {"endpoint": path, "status": exc.code, "message": message}
-            raise
+        for attempt in range(3):
+            delay = 75 - (time.monotonic() - last_call[0])
+            if delay > 0:
+                time.sleep(delay)
+            try:
+                with urllib.request.urlopen(request, timeout=45) as response:
+                    payload = json.load(response)
+                # Retry only an explicit server rate-limit rejection, never an
+                # ambiguous POST timeout or successful submission.
+                if (payload.get("status") is not True
+                        and "Exceed maximum access count" in str(payload.get("res", ""))
+                        and attempt < 2):
+                    result.setdefault("rate_limit_retries", []).append(path)
+                    continue
+                return payload
+            except urllib.error.HTTPError as exc:
+                message = exc.read().decode("utf-8", errors="replace")[:2000]
+                for secret in (key, user):
+                    if secret:
+                        message = message.replace(secret, "[REDACTED]")
+                result["http_error"] = {"endpoint": path, "status": exc.code, "message": message}
+                if exc.code == 400 and "Exceed maximum access count" in message and attempt < 2:
+                    result.setdefault("rate_limit_retries", []).append(path)
+                    continue
+                raise
+            finally:
+                last_call[0] = time.monotonic()
 
     if not user or not key:
         result["reason"] = "Required GitHub Secrets unavailable: ALGOGENE_USER_ID / ALGOGENE_API_KEY"
