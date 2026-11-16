@@ -80,7 +80,11 @@ class AlgoEvent:
                 raise ValueError("History is not a timestamp dictionary")
             # ALGOGENE documents close-time stamps. Strictly earlier timestamps
             # deliberately impose an additional bar delay on this baseline.
-            keys = sorted(t for t in history if t < md.timestamp)
+            normalized = {}
+            for raw_time, bar in history.items():
+                timestamp = raw_time if isinstance(raw_time, datetime) else datetime.fromisoformat(str(raw_time))
+                normalized[timestamp] = bar
+            keys = sorted(t for t in normalized if t < md.timestamp)
             if self.first_history:
                 self.evt.consoleLog("V1.1_HISTORY", "interval=H4", "count=%s" % len(keys),
                                     "first=%s" % (keys[0] if keys else "none"),
@@ -90,7 +94,7 @@ class AlgoEvent:
                 self.first_history = False
             decision = None
             for t in keys:
-                update = self.trend.add(t, history[t])
+                update = self.trend.add(t, normalized[t])
                 if update is not None:
                     decision = update
             if decision is None:

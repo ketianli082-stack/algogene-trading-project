@@ -61,3 +61,24 @@ class TrendTest(unittest.TestCase):
         self.assertEqual(algo.trend.last_time, now - timedelta(hours=4))
         self.assertEqual(algo.trend.ema, 100)
         self.assertEqual(algo.evt.orders, [])
+
+    def test_hourly_event_between_four_hour_boundaries_does_not_trade(self):
+        algo = self.module.AlgoEvent()
+        algo.start({"subscribeList": ["BTCUSD"]})
+        from types import SimpleNamespace
+        algo.on_marketdatafeed(SimpleNamespace(instrument="BTCUSD", timestamp=datetime(2021, 1, 1, 1)), {})
+        self.assertEqual(algo.evt.history_calls, [])
+        self.assertEqual(algo.evt.orders, [])
+
+    def test_platform_string_timestamps_are_normalized(self):
+        now = datetime(2021, 1, 1)
+        FakeHandler.history_response = {
+            str(now - timedelta(hours=4*i)): self.bar for i in range(1, 202)
+        }
+        algo = self.module.AlgoEvent()
+        algo.start({"subscribeList": ["BTCUSD"]})
+        from types import SimpleNamespace
+        algo.on_marketdatafeed(SimpleNamespace(instrument="BTCUSD", timestamp=now), {})
+        self.assertFalse(algo.halted)
+        self.assertEqual(algo.trend.ema, 100)
+        self.assertEqual(algo.trend.last_time, now - timedelta(hours=4))
