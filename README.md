@@ -1,6 +1,6 @@
 # ALGOGENE Crypto strategy project
 
-Current status: **V1.0 implemented; local tests and GitHub CI passed; ALGOGENE platform run NOT RUN** (2026-11-16 HKT).
+Current status: **V1.0 cloud backtest completed: history read and one buy/close round trip confirmed; P/L -34.11 USD** (2026-11-16 HKT). Backtest ID `20261116_101506_803491`; see [EXP-003 evidence and limitations](experiments/EXP-003-cloud-v1.0-result.md).
 
 The controlling deliverable is the user's current ALGOGENE official scoring template. Older repository plans, dates, candidate-team divisions, and research-stage assignments are retained as historical context only; they do not constrain current execution.
 

@@ -28,7 +28,13 @@ def main():
         output.write_text(json.dumps(result, indent=2), encoding="utf-8")
         print(json.dumps(result))
 
+    last_call = [0.0]
+
     def call(path, params, post=False):
+        delay = 61 - (time.monotonic() - last_call[0])
+        if delay > 0:
+            time.sleep(delay)
+        last_call[0] = time.monotonic()
         data = dict(params, user=user, api_key=key)
         request = urllib.request.Request(
             BASE + path if post else BASE + path + "?" + urllib.parse.urlencode(data),
@@ -74,8 +80,8 @@ def main():
             if state.get("status") is True and phase == "DONE":
                 result["status"] = "DONE"
                 # DONE describes task completion, not a successful trade or profit.
-                stats = call("/strategy_stats", {"runmode": "backtest", "runtime_id": result["backtest_id"]})
-                values = stats.get("res", {})
+                stats = call("/strategy_stats", {"runmode": "backtest", "runtime_id": result["backtest_id"], "acdate": ""})
+                values = stats.get("performance", {})
                 if isinstance(values, dict):
                     result["metrics"] = {k: values[k] for k in ("TradeCnt", "TotalPnL", "DailySharpe") if k in values and isinstance(values[k], (int, float))}
                 save()
