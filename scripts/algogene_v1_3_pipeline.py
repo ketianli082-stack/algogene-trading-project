@@ -12,6 +12,7 @@ import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "outputs/v1_3/platform-responses.json"
+LAST_API_FINISH = [0.0]
 
 
 def redact(value, secrets):
@@ -28,21 +29,23 @@ def redact(value, secrets):
     return value
 
 
-def main():
+def main(*, settings_override=None, source_override=None, output_override=None,
+         experiment="EXP-008", version="V1.3", on_submission=None):
+    output = Path(output_override) if output_override is not None else OUTPUT
     user = os.environ.get("ALGOGENE_USER_ID", "").strip()
     key = os.environ.get("ALGOGENE_API_KEY", "").strip()
     secrets = (key, user)
-    result = {"experiment": "EXP-008", "version": "V1.3", "data_role": "Development",
+    result = {"experiment": experiment, "version": version, "data_role": "Development",
               "code_commit": os.environ.get("GITHUB_SHA"),
               "workflow_run_id": os.environ.get("GITHUB_RUN_ID"),
               "workflow_attempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
               "status": "NOT RUN", "backtest_id": None, "task_id": None,
               "platform_responses": {}, "errors": []}
-    last_finish = [0.0]
+    last_finish = LAST_API_FINISH
 
     def save():
-        OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-        OUTPUT.write_text(json.dumps(redact(result, secrets), indent=2, ensure_ascii=False), encoding="utf-8")
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(redact(result, secrets), indent=2, ensure_ascii=False), encoding="utf-8")
 
     def call(endpoint, params, label, post=False):
         result["last_endpoint"] = endpoint
@@ -89,16 +92,21 @@ def main():
             result["reason"] = "Account preflight failed or another task is active; no submission"
             save()
             return 1
-        settings = json.loads((ROOT / "configs/v1_3_cloud.json").read_text())
-        if (settings["StartDate"], settings["EndDate"], settings["dataset"],
-                settings["subscribeList"]) != ("2021-01", "2023-12", 60, ["BTCUSD"]):
+        settings = settings_override if settings_override is not None else json.loads((ROOT / "configs/v1_3_cloud.json").read_text())
+        allowed_dates = {("2021-01", "2023-12"), ("2021-01", "2021-01")}
+        allowed_dates.update((str(year) + "-01", str(year) + "-12") for year in (2021, 2022, 2023))
+        if ((settings["StartDate"], settings["EndDate"]) not in allowed_dates
+                or settings["dataset"] != 60 or settings["subscribeList"] != ["BTCUSD"]
+                or settings["InitialCapital"] != 10000 or settings["Leverage"] != 1
+                or settings["allowShortSell"] is not False
+                or settings["isPositionBaseEnv"] is not False):
             raise ValueError("Unexpected experiment settings")
         result["requested_settings"] = settings
         meta = call("/meta_instrument", {"instrument": "BTCUSD"}, "contract_metadata")
         if float(meta.get("res", {}).get("contractSize", 0)) != 1:
             raise ValueError("Sizing requires contractSize=1")
         submission = call("/run_backtest", {
-            "code": (ROOT / "src/algogene_crypto_v1_3.py").read_text(),
+            "code": source_override if source_override is not None else (ROOT / "src/algogene_crypto_v1_3.py").read_text(),
             "settings": settings}, "submission", post=True)
         if submission.get("status") is not True:
             result["status"] = "SUBMISSION_REJECTED"
@@ -112,6 +120,8 @@ def main():
         result["status"] = "SUBMITTED"
         save()
         print("SUBMITTED backtest_id=" + result["backtest_id"], flush=True)
+        if on_submission is not None:
+            on_submission(output)
         deadline = time.monotonic() + 45 * 60
         while time.monotonic() < deadline:
             time.sleep(120)
@@ -132,7 +142,9 @@ def main():
                                 ("/strategy_pl", "daily_pl")):
             try:
                 request_params = {k: v for k, v in params.items() if k != "acdate" or endpoint != "/strategy_logs"}
-                call(endpoint, request_params, label)
+                payload = call(endpoint, request_params, label)
+                if not isinstance(payload, dict) or payload.get("status") is False or "error" in payload:
+                    result["errors"].append({"endpoint": endpoint, "reason": "Platform collection rejected; see raw response"})
             except Exception as exc:
                 result["errors"].append({"endpoint": endpoint, "error_type": type(exc).__name__})
                 save()
@@ -143,7 +155,9 @@ def main():
         console = result["platform_responses"].get("console", [{}])[-1]
         messages = str(console.get("res", ""))
         result["strategy_error_marker_seen"] = any(
-            marker in messages for marker in ("V1.3_HALTED", "V1.3_ORDER_UNCONFIRMED", "Traceback", "Error:"))
+            marker in messages for marker in ("V1.3_HALTED", "V1.3_ORDER_UNCONFIRMED", "V1.0_HISTORY_ERROR", "V1.0_HISTORY_REJECTED", "V1.0_ORDER_NOT_SUCCESSFUL", "Traceback", "Error:"))
+        if not result["configuration_matches_request"] or result["strategy_error_marker_seen"]:
+            result["errors"].append({"reason": "Configuration mismatch or strategy error marker; inspect raw evidence"})
         result["status"] = "COLLECTED" if not result["errors"] else "COLLECTED_WITH_ERRORS"
         # These are collection/consistency statuses, never profitability claims.
         save()
