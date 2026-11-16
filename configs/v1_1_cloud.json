@@ -1,5 +1,5 @@
 {
-  "strategyName": "V1.1 H4 signals H1 events Development attempt7",
+  "strategyName": "V1.1 H1 signals hourly Development EXP006",
   "subscribeList": ["BTCUSD"],
   "StartDate": "2021-01",
   "EndDate": "2023-12",

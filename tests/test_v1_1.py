@@ -62,12 +62,19 @@ class TrendTest(unittest.TestCase):
         self.assertEqual(algo.trend.ema, 100)
         self.assertEqual(algo.evt.orders, [])
 
-    def test_hourly_event_between_four_hour_boundaries_does_not_trade(self):
+    def test_hourly_event_between_old_four_hour_boundaries_is_processed(self):
+        now = datetime(2021, 1, 1, 1)
+        FakeHandler.history_response = {
+            str(now - timedelta(hours=i)): self.bar for i in range(1, 202)
+        }
         algo = self.module.AlgoEvent()
         algo.start({"subscribeList": ["BTCUSD"]})
         from types import SimpleNamespace
-        algo.on_marketdatafeed(SimpleNamespace(instrument="BTCUSD", timestamp=datetime(2021, 1, 1, 1)), {})
-        self.assertEqual(algo.evt.history_calls, [])
+        algo.on_marketdatafeed(SimpleNamespace(instrument="BTCUSD", timestamp=now), {})
+        self.assertEqual(len(algo.evt.history_calls), 1)
+        self.assertEqual(algo.evt.history_calls[0]["interval"], "H")
+        self.assertFalse(algo.halted)
+        self.assertEqual(algo.trend.last_time, now - timedelta(hours=1))
         self.assertEqual(algo.evt.orders, [])
 
     def test_platform_string_timestamps_are_normalized(self):
