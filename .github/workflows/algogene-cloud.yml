@@ -1,0 +1,33 @@
+name: ALGOGENE cloud backtest V1.0
+on:
+  push:
+    branches: [codex/algogene-crypto-v1.0]
+    paths: [configs/v1_0_cloud.json]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: algogene-cloud-backtest
+  cancel-in-progress: false
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Submit once and monitor cloud backtest
+        env:
+          ALGOGENE_USER_ID: ${{ secrets.ALGOGENE_USER_ID }}
+          ALGOGENE_API_KEY: ${{ secrets.ALGOGENE_API_KEY }}
+        run: python scripts/algogene_cloud_backtest.py
+      - name: Retain credential-free platform evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: algogene-cloud-backtest-evidence
+          path: outputs/cloud-backtest.json

@@ -1,31 +1,48 @@
-# ALGOGENE Trading Research Project
+# ALGOGENE Crypto strategy project
 
-当前为规划阶段，尚无已验证策略或正式结果。截止：2026 年 11 月 27 日 23:59（HKT）。
+Active research design: **2021–2023 Development, 2024 Validation, 2025 Final Test**. V1.0–V1.4 are iterative strategy versions. See the controlling [research protocol](docs/research_protocol.md) and [machine-readable windows](configs/research_windows.json). V1.0 is being rerun on January 2021 with effective-date verification.
 
-## 当前执行方式：先三份完整策略，再集中一份
+Current status: **V1.0 January 2021 Development functional test passed** (2026-11-16 HKT). Backtest ID `20261116_102901_961717`; platform P/L +1.291985 USD. See [EXP-004](experiments/EXP-004-v1.0-development.md). Annual strategy returns remain NOT RUN.
 
-1. **11 月 17 日 23:59 前**：A/B/C 各自交一个含信号、风险、资金、可运行代码、开发回测及初步实盘分析的基础版本。
-2. **18 日**：展示 2021—2023 开发结果，形成候选和验证计划。
-3. **19—20 日**：用 2024 验证并选择主方案，重新分配策略核心 S、风险资金 R、实验实盘 E。
-4. **21—22 日**：联合迭代与冻结；**23 日**测试 2025；**24—26 日**完成报告及提交，27 日缓冲。
+The controlling deliverable is the user's current ALGOGENE official scoring template. Older repository plans, dates, candidate-team divisions, and research-stage assignments are retained as historical context only; they do not constrain current execution.
 
-选型按可信、可执行、风险收益、稳定性和完善难度，不只按最高收益。每个人前期覆盖老师全部问题，正式报告仍逐题回答。不设复核人或审批。
+## V1.0
 
-## 入口
+V1.0 is a minimal compatibility experiment for BTCUSD:
 
-- [今晚会议议程与决定表](docs/meeting_2026-11-11.md)
-- [统一交付与比较规则](docs/candidate_protocol.md)
-- [两阶段责任与交接](docs/team_roles.md)
-- [完整执行方案](docs/execution_plan.md)
-- [老师 28 项问题](docs/teacher_questions.md)
-- [平台能力核查及官方资料](docs/platform_capabilities.md)
-- [候选策略目录](candidates/README.md)
-- [目录规范](docs/repository_structure.md)
-- [协作规则](CONTRIBUTING.md)
-- [研究决定](docs/decisions.md)
+- read three hourly historical bars with `getHistoricalBar`;
+- submit one guarded `0.01` BTC market buy in an ALGOGENE cloud backtest;
+- attach a 2% stop loss;
+- close once on the next market event using the returned `tradeID`;
+- refuse duplicates, missing data, invalid prices, and wrong subscriptions.
 
-初期策略类型和数字条件待会议确定，趋势突破只是一个候选。平台公开资料不证明课程账户权限，先做技术测试。每人可以共享平台发现与通用工具，独立完成策略和研究记录。
+Start here:
 
-## 公开范围
+- [Executable ALGOGENE script](src/algogene_crypto_v1_0.py)
+- [Runbook, API evidence, and risk controls](docs/v1_0_runbook.md)
+- [Reference backtest settings](configs/v1_0_smoke_test.json)
+- [EXP-001 result record](experiments/EXP-001-v1.0-smoke.md)
+- [Official-template report workspace](report/README.md)
 
-不上传密码、密钥、UID、私密账户资料、未经授权行情或私人分享链接。大型原始数据、完整日志、含身份报告和提交凭证放团队受限空间。仓库公开不等于授予开源许可，本次不添加许可证。
+## Truth and security rules
+
+- `PASS` means direct evidence exists. Platform work that has not run is recorded as `NOT RUN`, never as an assumed success.
+- Never invent a Backtest ID, trade, fill, P/L, Sharpe ratio, drawdown, or account permission.
+- Never commit API keys, user IDs, account IDs, private exports, or unredacted platform logs.
+- GitHub CI tests the script with a fake documented API surface. That is not an ALGOGENE backtest.
+- A separate manual workflow can perform a read-only BTCUSD history call using GitHub Secrets; it cannot place trades or submit a cloud backtest.
+
+## Official scoring-template order
+
+The working report follows the supplied template rather than the repository's previous planning structure:
+
+1. ALGOGENE System Info — User ID and Backtest ID remain private/blank until a real run exists.
+2. Strategy Script.
+3. Executive Summary (15 points).
+4. Implementation Details (20 points).
+5. Risk Management (20 points).
+6. Capital Management (15 points).
+7. Backtest Performance.
+8. Real Trading / implementation considerations.
+
+Existing material under `docs/` and `candidates/` may be reused only when it is consistent with actual V1.x evidence and the official template.

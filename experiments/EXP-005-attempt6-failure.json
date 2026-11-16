@@ -1,0 +1,72 @@
+{
+  "status": "STRATEGY_ERROR",
+  "backtest_id": "20261116_110053_532667",
+  "task_id": "1794826853532667",
+  "code_commit": "62e78c5600fe5479de1834380bbe3803bfd2cec4",
+  "observations": [
+    "DONE"
+  ],
+  "data_role": "Development",
+  "version": "V1.1",
+  "last_endpoint": "/strategy_logs",
+  "contract": {
+    "contractSize": 1,
+    "settleCurrency": "USD",
+    "producttype": "SPOT"
+  },
+  "settings": {
+    "strategyName": "V1.1 H4 signals H1 events Development attempt6",
+    "subscribeList": [
+      "BTCUSD"
+    ],
+    "StartDate": "2021-01",
+    "EndDate": "2023-12",
+    "InitialCapital": 10000,
+    "BaseCurrency": "USD",
+    "risk_free": 0,
+    "Leverage": 1,
+    "allowShortSell": false,
+    "dataset": 60,
+    "isPositionBaseEnv": false,
+    "isNewsFeedOn": false,
+    "isEconstatFeedon": false,
+    "isWeatherFeedOn": false
+  },
+  "metrics": {
+    "TradeCnt": 0,
+    "TotalPnL": 0,
+    "AnnualSharpe": 0,
+    "DailySharpe": 0,
+    "maxDrawdown_pct": 0,
+    "maxDrawdown_amt": 0,
+    "simpleReturn": 0,
+    "WinRate": 0.5
+  },
+  "effective_settings": {
+    "strategyName": "V1.1 H4 signals H1 events Development attempt6",
+    "subscribeList": [
+      "BTCUSD"
+    ],
+    "StartDate": "2021-01",
+    "EndDate": "2023-12",
+    "InitialCapital": "10000.0",
+    "BaseCurrency": "USD",
+    "risk_free": "0.0",
+    "Leverage": "1.0",
+    "allowShortSell": "1.0",
+    "dataset": "60",
+    "isPositionBaseEnv": "False",
+    "isNewsFeedOn": "False",
+    "isEconstatFeedon": "False",
+    "isWeatherFeedOn": "False"
+  },
+  "effective_cost_settings": {
+    "TradeCost": "0.0",
+    "commission": "UNKNOWN",
+    "slippage": "UNKNOWN",
+    "funding": "UNKNOWN"
+  },
+  "period_matches_request": true,
+  "dataset_matches_request": true,
+  "platform_logs": "[2021-01-01 00:00:00] Backtest started!\n[2021-01-01 00:00:00] V1.1_HALTED, TypeError, '<' not supported between instances of 'str' and 'datetime.datetime'\n[2023-12-31 23:59:59] Backtest finished!\n"
+}

@@ -1,0 +1,35 @@
+name: ALGOGENE V1.1 Development
+on:
+  push:
+    branches: [codex/algogene-crypto-v1.0]
+    paths: [configs/v1_1_cloud.json]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: algogene-cloud-backtest
+  cancel-in-progress: false
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run V1.1 on ALGOGENE Development data
+        env:
+          ALGOGENE_USER_ID: ${{ secrets.ALGOGENE_USER_ID }}
+          ALGOGENE_API_KEY: ${{ secrets.ALGOGENE_API_KEY }}
+          STRATEGY_VERSION: V1.1
+          STRATEGY_CONFIG: configs/v1_1_cloud.json
+          STRATEGY_SOURCE: src/algogene_crypto_v1_1.py
+        run: python -u scripts/algogene_cloud_backtest.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v1-1-development-evidence
+          path: outputs/cloud-backtest.json
