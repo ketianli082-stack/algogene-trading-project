@@ -1,6 +1,6 @@
 # ALGOGENE Crypto strategy project
 
-Current status: **V1.0 implemented and locally tested; ALGOGENE platform run NOT RUN** (2026-11-16 HKT).
+Current status: **V1.0 implemented; local tests and GitHub CI passed; ALGOGENE platform run NOT RUN** (2026-11-16 HKT).
 
 The controlling deliverable is the user's current ALGOGENE official scoring template. Older repository plans, dates, candidate-team divisions, and research-stage assignments are retained as historical context only; they do not constrain current execution.
 
