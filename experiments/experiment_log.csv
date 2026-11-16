@@ -1,1 +1,2 @@
 experiment_id,purpose,owner,code_commit,config_path,sample_role,start_date,end_date,platform_backtest_id,result_location,status,notes
+EXP-001,Verify BTCUSD history and one guarded buy-close round trip,project,codex/algogene-crypto-v1.0,configs/v1_0_smoke_test.json,platform compatibility smoke test,2026-11-16,,NOT RUN,experiments/EXP-001-v1.0-smoke.md,NOT RUN,Local tests only; no ALGOGENE account or backtest result claimed
