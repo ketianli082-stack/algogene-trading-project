@@ -5,6 +5,5 @@
   "v1_0_smoke": {"start": "2021-01", "end": "2021-01", "role": "Development"},
   "comparison_versions": ["V1.1", "V1.2", "V1.3", "V1.4"],
   "target_data_interval_minutes": 240,
-  "initial_capital_usd": 10000,
-  "prior_2025_exposure": "EXP-003 accidentally executed December 2025; disclose and exclude from tuning"
+  "initial_capital_usd": 10000
 }

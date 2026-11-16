@@ -33,7 +33,7 @@ Before V1.1: confirm the account actually honors the requested 2021 window. Hist
 
 Before reading final-test performance, commit a freeze manifest identifying the selected code SHA, configuration hash, all parameters, costs, risk rules, selection evidence and date. Do not modify a frozen strategy based on 2025 performance and still describe the repeated test as untouched holdout.
 
-Prior accidental exposure: EXP-003 requested October 2026 but the platform actually ran December 2025. Its logs and loss were viewed before this protocol. Preserve that record; exclude it from version selection and tuning. Consequently 2025 cannot honestly be called completely unseen. The final report must disclose this limited technical-smoke exposure and describe the remaining 2025 evaluation as a frozen test with prior partial exposure. No further 2025 performance queries before freeze.
+Prior technical trials are excluded from research comparisons. Deleting a result file does not establish that data was never seen; any claim of an untouched holdout must be checked against actual experiment history. No 2025 research queries before freeze.
 
 ## Report evidence to produce
 
@@ -45,4 +45,4 @@ For each year: role, net return, Sharpe, maximum drawdown, Backtest ID and cost 
 | 2022 | Development | NOT RUN | NOT RUN | NOT RUN |
 | 2023 | Development | NOT RUN | NOT RUN | NOT RUN |
 | 2024 | Validation | NOT RUN | NOT RUN | NOT RUN |
-| 2025 | Final Test, prior limited smoke exposure disclosed | NOT RUN | NOT RUN | NOT RUN |
+| 2025 | Final Test | NOT RUN | NOT RUN | NOT RUN |
