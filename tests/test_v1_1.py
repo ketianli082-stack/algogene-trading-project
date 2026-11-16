@@ -62,7 +62,7 @@ class TrendTest(unittest.TestCase):
         self.assertEqual(algo.trend.ema, 100)
         self.assertEqual(algo.evt.orders, [])
 
-    def test_hourly_event_between_old_four_hour_boundaries_is_processed(self):
+    def test_each_hourly_event_is_processed(self):
         now = datetime(2021, 1, 1, 1)
         FakeHandler.history_response = {
             str(now - timedelta(hours=i)): self.bar for i in range(1, 202)

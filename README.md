@@ -2,7 +2,7 @@
 
 Active research design: **2021–2023 Development, 2024 Validation, 2025 Final Test**. V1.0–V1.4 are iterative strategy versions. See the controlling [research protocol](docs/research_protocol.md) and [machine-readable windows](configs/research_windows.json). V1.0 is being rerun on January 2021 with effective-date verification.
 
-Active V1.1 setting: **60-minute BTCUSD candles and hourly decisions**, EMA200, Donchian20 entry / Donchian10 or EMA exit, fixed 0.01 lot, long-only. [EXP-006](experiments/EXP-006-v1.1-hourly.md) supersedes the prior H4 signal experiment. No five-minute experiment was launched.
+Active V1.1 setting: **60-minute BTCUSD candles and hourly decisions**, EMA200, Donchian20 entry / Donchian10 or EMA exit, fixed 0.01 lot, long-only. See [EXP-006](experiments/EXP-006-v1.1-hourly.md).
 
 Current status: **V1.0 January 2021 Development functional test passed** (2026-11-16 HKT). Backtest ID `20261116_102901_961717`; platform P/L +1.291985 USD. See [EXP-004](experiments/EXP-004-v1.0-development.md). Annual strategy returns remain NOT RUN.
 
