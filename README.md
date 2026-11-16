@@ -6,6 +6,8 @@ Active V1.1 setting: **60-minute BTCUSD candles and hourly decisions**, EMA200, 
 
 V1.2 is registered in [EXP-007](experiments/EXP-007-v1.2-hourly.md): identical hourly signals and platform settings, ATR14-based opening quantity. Its Actions workflow automatically submits, waits, collects original platform responses and commits the evidence bundle. Platform-returned statistics are authoritative; no local P/L or return reconstruction for new runs.
 
+V1.3 is registered in [EXP-008](experiments/EXP-008-v1.3-hourly.md): keep V1.2 signals and ATR sizing; attach the platform-native stopLossLevel at ask minus 2×ATR14. The same automatic collection/archive process saves original platform outputs, without local metric recalculation.
+
 Current status: **V1.1 hourly Development backtest completed for 2021–2023** (2026-11-16 HKT). Backtest ID `20261116_111622_055223`; platform P/L **-120.4837 USD**, AnnualSharpe **-0.251975**, maximum drawdown **3.820864%**, **259 round trips**. See [EXP-006 evidence and accounting qualifications](experiments/EXP-006-v1.1-hourly.md). V1.0 functional evidence remains in [EXP-004](experiments/EXP-004-v1.0-development.md). Independent annual tests, Validation and Final Test remain NOT RUN.
 
 The controlling deliverable is the user's current ALGOGENE official scoring template. Older repository plans, dates, candidate-team divisions, and research-stage assignments are retained as historical context only; they do not constrain current execution.
