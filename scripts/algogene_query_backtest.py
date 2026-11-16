@@ -13,7 +13,7 @@ def main():
     user = os.environ["ALGOGENE_USER_ID"]
     key = os.environ["ALGOGENE_API_KEY"]
     result = {"backtest_id": RUNTIME_ID, "queries": {}}
-    for endpoint in ("strategy_logs", "strategy_stats"):
+    for endpoint in ("strategy_stats",):
         params = dict(user=user, api_key=key, runtime_id=RUNTIME_ID, runmode="backtest")
         if endpoint == "strategy_stats":
             params["acdate"] = ""
@@ -34,6 +34,7 @@ def main():
                 result["queries"][endpoint] = {
                     "performance": payload.get("performance"),
                     "response_fields": sorted(payload.keys()),
+                    "actual_settings": {k: payload.get("settings", payload.get("setting", {})).get(k) for k in ("StartDate", "EndDate", "dataset", "Leverage", "InitialCapital", "subscribeList")},
                 }
         except urllib.error.HTTPError as exc:
             # Read the API error body, but redact credentials before recording it.
