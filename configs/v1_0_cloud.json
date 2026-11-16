@@ -1,0 +1,16 @@
+{
+  "strategyName": "Crypto V1.0 API smoke",
+  "subscribeList": ["BTCUSD"],
+  "StartDate": "2026-10",
+  "EndDate": "2026-10",
+  "InitialCapital": 10000,
+  "BaseCurrency": "USD",
+  "risk_free": 0,
+  "Leverage": 1,
+  "allowShortSell": false,
+  "dataset": 60,
+  "isPositionBaseEnv": false,
+  "isNewsFeedOn": false,
+  "isEconstatFeedon": false,
+  "isWeatherFeedOn": false
+}
