@@ -21,7 +21,7 @@ def main():
     key = os.environ.get("ALGOGENE_API_KEY", "").strip()
     result = {"status": "NOT RUN", "backtest_id": None, "task_id": None,
               "code_commit": os.environ.get("GITHUB_SHA"), "observations": [],
-              "data_role": "Development", "version": "V1.0"}
+              "data_role": "Development", "version": os.environ.get("STRATEGY_VERSION", "V1.0")}
 
     def save():
         output = ROOT / "outputs" / "cloud-backtest.json"
@@ -56,10 +56,16 @@ def main():
             result["reason"] = "Preflight failed or account has outstanding tasks; no submission"
             save()
             return 1
-        settings = json.loads((ROOT / "configs/v1_0_cloud.json").read_text())
+        settings = json.loads((ROOT / os.environ.get("STRATEGY_CONFIG", "configs/v1_0_cloud.json")).read_text())
+        if settings["StartDate"] < "2021-01" or settings["EndDate"] > "2023-12":
+            raise ValueError("Development runner refuses validation/final-test dates")
+        metadata = call("/meta_instrument", {"instrument": "BTCUSD"}).get("res", {})
+        result["contract"] = {k: metadata.get(k) for k in ("contractSize", "settleCurrency", "producttype")}
+        if float(metadata.get("contractSize", 0)) != 1:
+            raise ValueError("Fixed-volume capital check requires verified contractSize=1")
         result["settings"] = settings
         submitted = call("/run_backtest", {
-            "code": (ROOT / "src/algogene_crypto_v1_0.py").read_text(),
+            "code": (ROOT / os.environ.get("STRATEGY_SOURCE", "src/algogene_crypto_v1_0.py")).read_text(),
             "settings": settings,
         }, post=True)
         if submitted.get("status") is not True:
@@ -84,11 +90,14 @@ def main():
                 stats = call("/strategy_stats", {"runmode": "backtest", "runtime_id": result["backtest_id"], "acdate": ""})
                 values = stats.get("performance", {})
                 if isinstance(values, dict):
-                    result["metrics"] = {k: values[k] for k in ("TradeCnt", "TotalPnL", "DailySharpe") if k in values and isinstance(values[k], (int, float))}
+                    result["metrics"] = {k: values[k] for k in ("TradeCnt", "TotalPnL", "AnnualSharpe", "DailySharpe", "maxDrawdown_pct", "maxDrawdown_amt", "simpleReturn", "WinRate") if k in values and isinstance(values[k], (int, float))}
                 effective = stats.get("settings", stats.get("setting", {}))
                 result["effective_settings"] = {k: effective.get(k) for k in settings}
+                result["effective_cost_settings"] = {k: effective.get(k, "UNKNOWN") for k in ("TradeCost", "commission", "slippage", "funding")}
                 matches = all(str(effective.get(k)) == str(settings[k]) for k in ("StartDate", "EndDate"))
                 result["period_matches_request"] = matches
+                result["dataset_matches_request"] = str(effective.get("dataset")) == str(settings["dataset"])
+                matches = matches and result["dataset_matches_request"]
                 if not matches:
                     result["status"] = "INVALID_PERIOD"
                     result["reason"] = "Platform effective dates differ from requested Development dates; exclude performance from research"
@@ -98,6 +107,9 @@ def main():
                     if secret:
                         messages = messages.replace(secret, "[REDACTED]")
                 result["platform_logs"] = messages
+                if "V1.1_HALTED" in messages or "V1.1_ORDER_UNCONFIRMED" in messages:
+                    result["status"] = "STRATEGY_ERROR"
+                    matches = False
                 save()
                 return 0 if matches else 1
         result["status"] = "PENDING"

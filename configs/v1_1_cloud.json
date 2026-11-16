@@ -1,0 +1,16 @@
+{
+  "strategyName": "V1.1 EMA200 Donchian20 Development",
+  "subscribeList": ["BTCUSD"],
+  "StartDate": "2021-01",
+  "EndDate": "2023-12",
+  "InitialCapital": 10000,
+  "BaseCurrency": "USD",
+  "risk_free": 0,
+  "Leverage": 1,
+  "allowShortSell": false,
+  "dataset": 240,
+  "isPositionBaseEnv": false,
+  "isNewsFeedOn": false,
+  "isEconstatFeedon": false,
+  "isWeatherFeedOn": false
+}
