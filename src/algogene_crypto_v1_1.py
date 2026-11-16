@@ -60,6 +60,10 @@ class AlgoEvent:
     def on_marketdatafeed(self, md, ab):
         if md.instrument != "BTCUSD" or md.timestamp == self.last_event:
             return
+        # Account permits H1 events but not native 240-minute events. Keep
+        # decisions on four-hour boundaries and query H4 indicator candles.
+        if md.timestamp.hour % 4 != 0 or md.timestamp.minute != 0:
+            return
         self.last_event = md.timestamp
         # Explicit terminal liquidation before the final H4 event; no new entries.
         terminal = md.timestamp >= datetime(2023, 12, 31, 16)

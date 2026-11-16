@@ -1,5 +1,5 @@
 {
-  "strategyName": "V1.1 EMA200 Donchian20 Development attempt5",
+  "strategyName": "V1.1 H4 signals H1 events Development attempt6",
   "subscribeList": ["BTCUSD"],
   "StartDate": "2021-01",
   "EndDate": "2023-12",
@@ -8,7 +8,7 @@
   "risk_free": 0,
   "Leverage": 1,
   "allowShortSell": false,
-  "dataset": 240,
+  "dataset": 60,
   "isPositionBaseEnv": false,
   "isNewsFeedOn": false,
   "isEconstatFeedon": false,
