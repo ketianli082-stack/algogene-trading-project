@@ -65,7 +65,7 @@ class AlgoEvent:
         terminal = md.timestamp >= datetime(2023, 12, 31, 16)
         if terminal:
             if self.trade_id is not None and not self.pending:
-                self.close()
+                self.send_exit()
             return
         if self.pending or self.halted:
             return
@@ -99,7 +99,7 @@ class AlgoEvent:
                                     "ema=%s" % self.trend.ema, "entries=%s" % self.signals)
             if self.trade_id is not None:
                 if decision["exit"]:
-                    self.close()
+                    self.send_exit()
             elif decision["entry"]:
                 price = float(md.askPrice)
                 if not math.isfinite(price) or price <= 0:
@@ -119,9 +119,9 @@ class AlgoEvent:
             self.halted = True
             self.evt.consoleLog("V1.1_HALTED", type(exc).__name__, str(exc))
             if self.trade_id is not None and not self.pending:
-                self.close()
+                self.send_exit()
 
-    def close(self):
+    def send_exit(self):
         self.pending = True
         self.evt.sendOrder(AlgoAPIUtil.OrderObject(tradeID=self.trade_id, openclose="close"))
 
