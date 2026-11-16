@@ -4,7 +4,7 @@ Active research design: **2021–2023 Development, 2024 Validation, 2025 Final T
 
 Active V1.1 setting: **60-minute BTCUSD candles and hourly decisions**, EMA200, Donchian20 entry / Donchian10 or EMA exit, fixed 0.01 lot, long-only. See [EXP-006](experiments/EXP-006-v1.1-hourly.md).
 
-Current status: **V1.0 January 2021 Development functional test passed** (2026-11-16 HKT). Backtest ID `20261116_102901_961717`; platform P/L +1.291985 USD. See [EXP-004](experiments/EXP-004-v1.0-development.md). Annual strategy returns remain NOT RUN.
+Current status: **V1.1 hourly Development backtest completed for 2021–2023** (2026-11-16 HKT). Backtest ID `20261116_111622_055223`; platform P/L **-120.4837 USD**, AnnualSharpe **-0.251975**, maximum drawdown **3.820864%**, **259 round trips**. See [EXP-006 evidence and accounting qualifications](experiments/EXP-006-v1.1-hourly.md). V1.0 functional evidence remains in [EXP-004](experiments/EXP-004-v1.0-development.md). Independent annual tests, Validation and Final Test remain NOT RUN.
 
 The controlling deliverable is the user's current ALGOGENE official scoring template. Older repository plans, dates, candidate-team divisions, and research-stage assignments are retained as historical context only; they do not constrain current execution.
 
