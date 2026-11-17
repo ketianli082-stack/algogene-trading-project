@@ -25,7 +25,7 @@ def plan():
     config = json.loads((ROOT / "configs/exp015_h1_score.json").read_text())
     expected = json.loads((ROOT / "configs/exp010_ema_fee.json").read_text())["settings"]
     expected["strategyName"] = "EXP015 H1 score research"
-    if (config["experiment"] != "EXP-015" or config["data_role"] != "Development" or config["trigger"] != "2026-11-17-h1-score-01"
+    if (config["experiment"] != "EXP-015" or config["data_role"] != "Development" or config["trigger"] != "2026-11-17-h1-score-02"
             or config["candidates"] != REGISTERED or config["settings"] != expected
             or expected["StartDate"] != "2021-01" or expected["EndDate"] != "2023-12"
             or expected["dataset"] != 60 or expected["TradeCost"] != 1.0
