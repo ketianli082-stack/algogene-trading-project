@@ -79,11 +79,12 @@
       }
     }
   ],
-  "trigger": "2026-11-17-h1-score-01",
+  "trigger": "2026-11-17-h1-score-02",
   "selection_rule": {
     "metric": "Score_Total",
     "min_transaction_events": 40,
     "max_native_drawdown_pct_decimal": 0.03,
     "min_native_total_pnl_USD": -100
-  }
+  },
+  "relaunch_reason": "Initial EXP015 GitHub Actions run failed offline assertion before any ALGOGENE submissions; fixed only unit test, no prior backtest IDs."
 }
