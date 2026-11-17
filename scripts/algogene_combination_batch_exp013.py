@@ -1,4 +1,4 @@
-"""Four pre-registered multi-change candidates; native fees and native scores only."""
+"""EXP013: three controlled Development candidates; native metrics only."""
 import hashlib
 import json
 import math
@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 
 from algogene_v1_3_pipeline import main as run_cloud, redact
-from algogene_research_batch import fee_verified
+from algogene_research_batch import fee_verified, effective_fee
 from archive_v1_4_results import archive
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -103,13 +103,13 @@ def main():
 
         exit_code = run_cloud(settings_override=row["settings"], source_override=row["submitted_source"],
                               output_override=path, experiment="EXP-013/" + row["name"],
-                              version="V1.7 combination research", on_submission=submitted)
+                              version="V1.7 controlled research", on_submission=submitted)
         result = annotate()
         if result["status"] == "COLLECTED":
             result["native_fee_verified"] = fee_verified(result)
             score = native_fields(result).get("Score_Total")
             result["native_score_available"] = isinstance(score, (int, float)) and math.isfinite(score)
-            if (not result["native_fee_verified"] and native_fields(result).get("TradeCnt") != 0) or not result["native_score_available"]:
+            if (not result["native_fee_verified"] and native_fields(result).get("TradeCnt") != 0) or not result["native_score_available"] or effective_fee(result) != 1.0:
                 result["status"] = "COLLECTED_WITH_ERRORS"
                 result["errors"].append({"reason": "Native fee or Score_Total unavailable; inspect raw evidence"})
             write(path, result)
