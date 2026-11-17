@@ -20,7 +20,7 @@ REGISTERED = [
 
 
 def plan():
-    config = json.loads((ROOT / "configs/exp013_combinations.json").read_text())
+    config = json.loads((ROOT / "configs/exp013_cost_h4.json").read_text())
     expected = json.loads((ROOT / "configs/exp010_ema_fee.json").read_text())["settings"]
     expected["strategyName"] = "EXP013 H1 cost vs H4"
     if (config["experiment"] != "EXP-013" or config["data_role"] != "Development" or config["trigger"] != "2026-11-17-cost-h4-01"
@@ -38,7 +38,7 @@ def plan():
         # JSON uses only strings and numbers here, so is also a Python literal.
         source = template.replace(PARAM_LINE, "PARAMS = " + repr(candidate["params"]), 1)
         compile(source, "submitted-strategy.py", "exec")
-        settings = dict(expected, strategyName="EXP013 H1 " + candidate["name"])
+        settings = dict(expected, strategyName="EXP013 " + candidate["name"])
         rows.append(dict(candidate, settings=settings, submitted_source=source,
                          source_sha256=hashlib.sha256(source.encode()).hexdigest(), status="NOT RUN"))
     return config, rows
