@@ -14,7 +14,7 @@ def archive(source, name="bundle", experiment="EXP-009"):
         print("No result bundle available; inspect workflow logs")
         return
     repository, branch = os.environ["GITHUB_REPOSITORY"], os.environ["GITHUB_REF_NAME"]
-    if experiment not in ("EXP-009", "EXP-010", "EXP-011", "EXP-012"):
+    if experiment not in ("EXP-009", "EXP-010", "EXP-011", "EXP-012", "EXP-013"):
         raise ValueError("Unexpected experiment destination")
     if repository != "ketianli082-stack/algogene-trading-project" or branch != "codex/algogene-crypto-v1.0":
         raise ValueError("Unexpected archive destination")
@@ -38,6 +38,6 @@ def archive(source, name="bundle", experiment="EXP-009"):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", default="outputs/v1_4/platform-responses.json")
-    parser.add_argument("--experiment", default="EXP-009", choices=("EXP-009", "EXP-010", "EXP-011", "EXP-012"))
+    parser.add_argument("--experiment", default="EXP-009", choices=("EXP-009", "EXP-010", "EXP-011", "EXP-012", "EXP-013"))
     args = parser.parse_args()
     archive(args.source, experiment=args.experiment)
