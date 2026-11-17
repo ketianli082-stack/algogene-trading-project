@@ -1,0 +1,42 @@
+name: ALGOGENE EXP012 history-driven precision and bracket research
+on:
+  push:
+    branches: [codex/algogene-crypto-v1.0]
+    paths: [configs/exp012_history_research.json]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: algogene-cloud-backtest
+  cancel-in-progress: false
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify guards without platform calls
+        run: python -m unittest discover -s tests
+      - name: Native quantity probe and bounded strategy batch
+        env:
+          ALGOGENE_USER_ID: ${{ secrets.ALGOGENE_USER_ID }}
+          ALGOGENE_API_KEY: ${{ secrets.ALGOGENE_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python -u scripts/algogene_history_research.py
+      - name: Preserve complete and partial evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp012-native-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: outputs/exp012/
+          retention-days: 90
+      - name: Commit native evidence or failure record
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/archive_v1_4_results.py --experiment EXP-012 --source outputs/exp012/platform-responses.json

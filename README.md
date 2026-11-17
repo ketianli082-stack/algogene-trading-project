@@ -14,7 +14,7 @@ Current status: **V1.1–V1.3 hourly Development backtests completed for 2021–
 
 The controlling deliverable is the user's current ALGOGENE official scoring template. Older repository plans, dates, candidate-team divisions, and research-stage assignments are retained as historical context only; they do not constrain current execution.
 
-EXP-010 completed: [native result review](experiments/EXP-010-review.json), Score_Total **36.08528153883827**, TotalPnL **-34.0512 USD**, native fixed TradeCost **1.0** verified. The next [EXP-011 combination batch](experiments/EXP-011-combinations.md) registers four multi-change V1.5 candidates on 2021–2023 only, with the same risk caps and fee. Native total score and six subscores are now explicit comparison fields alongside profitability/drawdown. Candidates are NOT RUN until native evidence arrives; 2024/2025 remain unused.
+Current review: [15 historical strategy records](experiments/history-through-EXP-011.md), including all four EXP-011 combinations, which were collected and all lost money. A higher native Score_Total did not guarantee better P/L; all failures remain archived. [EXP-012](experiments/EXP-012-history-research.md) now registers a native .001-quantity probe, optional fine-size EMA control, two native TP/hold-time variants and two flat-regime range variants. It addresses actual SKIP_SIZE logs without raising risk caps. All new results are NOT RUN until native evidence arrives. Same hourly data and fixed fee 1.0; 2024/2025 stay unused.
 
 ## V1.0
 
