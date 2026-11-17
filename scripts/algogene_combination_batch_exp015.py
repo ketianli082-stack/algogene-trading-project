@@ -56,6 +56,43 @@ def native_fields(evidence):
     return {key: p[key] for key in keys if key in p}
 
 
+
+def score_leaderboard(rows):
+    """Rank platform-provided scores only, with pre-registered research guards."""
+    results = []
+    for row in rows:
+        native = row.get("native_comparison", {})
+        score = native.get("Score_Total")
+        trades = native.get("TradeCnt")
+        drawdown = native.get("maxDrawdown_pct")
+        pnl = native.get("TotalPnL")
+        reasons = []
+        if row.get("status") != "COLLECTED":
+            reasons.append("Native result not fully collected")
+        for field, value in (("Score_Total", score), ("TradeCnt", trades),
+                             ("maxDrawdown_pct", drawdown), ("TotalPnL", pnl)):
+            if not isinstance(value, (int, float)) or isinstance(value, bool) or not math.isfinite(value):
+                reasons.append(field + " missing/non-finite")
+        if not reasons:
+            if trades < 40:
+                reasons.append("Fewer than 40 transaction events")
+            if drawdown > 0.03:
+                reasons.append("Maximum native drawdown exceeds 3 percent")
+            if pnl < -100:
+                reasons.append("Net PnL below -1 percent initial capital")
+        results.append({"name": row["name"], "native": native,
+                        "status": row.get("status"), "eligible": not reasons,
+                        "exclusions": reasons, "backtest_id": row.get("evidence", {}).get("backtest_id")})
+    results.sort(key=lambda x: x["native"].get("Score_Total", float("-inf")), reverse=True)
+    eligible = [x for x in results if x["eligible"]]
+    return {"primary_objective": "ALGOGENE native Score_Total",
+            "eligibility_rules": {"status": "COLLECTED", "min_transaction_events": 40,
+                                  "max_native_drawdown_pct_decimal": 0.03,
+                                  "min_native_total_pnl_USD": -100},
+            "native_score_ranking": results,
+            "top_eligible_candidate": eligible[0]["name"] if eligible else None,
+            "caution": "Native score may reward steady losses; ranking is research-only, not an instruction to trade."}
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     bundle = {"experiment": "EXP-015", "data_role": "Development", "status": "NOT RUN",
@@ -131,7 +168,16 @@ def main():
             save()
             return 1
     bundle["status"] = "COLLECTED" if all(row["status"] == "COLLECTED" for row in rows) else "FINISHED_WITH_FAILURES"
+    leaderboard = score_leaderboard(rows)
+    write(OUT / "native-score-leaderboard.json", leaderboard)
+    bundle["top_eligible_candidate"] = leaderboard["top_eligible_candidate"]
     save()
+    try:
+        archive(OUT / "native-score-leaderboard.json", "score-leaderboard", experiment="EXP-015")
+    except Exception as exc:
+        bundle.update(status="STOPPED", reason="Score leaderboard archive failed", error_type=type(exc).__name__)
+        save()
+        return 1
     return 0 if bundle["status"] == "COLLECTED" else 1
 
 
