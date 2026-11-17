@@ -1,5 +1,6 @@
 """Immutable, redacted research checkpoints and final bundle on the existing branch."""
 import base64
+import argparse
 import json
 import os
 from pathlib import Path
@@ -7,19 +8,21 @@ import re
 import urllib.request
 
 
-def archive(source, name="bundle"):
+def archive(source, name="bundle", experiment="EXP-009"):
     source = Path(source)
     if not source.is_file():
         print("No result bundle available; inspect workflow logs")
         return
     repository, branch = os.environ["GITHUB_REPOSITORY"], os.environ["GITHUB_REF_NAME"]
+    if experiment not in ("EXP-009", "EXP-010"):
+        raise ValueError("Unexpected experiment destination")
     if repository != "ketianli082-stack/algogene-trading-project" or branch != "codex/algogene-crypto-v1.0":
         raise ValueError("Unexpected archive destination")
     run_id, attempt = os.environ["GITHUB_RUN_ID"], os.environ["GITHUB_RUN_ATTEMPT"]
     if not run_id.isdigit() or not attempt.isdigit() or not re.fullmatch(r"[a-z0-9.-]+", name):
         raise ValueError("Unexpected archive identifier")
-    path = "experiments/EXP-009/runs/%s-attempt-%s-%s.json" % (run_id, attempt, name)
-    payload = {"message": "results: EXP009 " + name + " run " + run_id,
+    path = "experiments/" + experiment + "/runs/%s-attempt-%s-%s.json" % (run_id, attempt, name)
+    payload = {"message": "results: " + experiment + " " + name + " run " + run_id,
                "branch": branch, "content": base64.b64encode(source.read_bytes()).decode("ascii")}
     headers = {"Authorization": "Bearer " + os.environ["GITHUB_TOKEN"],
                "Accept": "application/vnd.github+json", "Content-Type": "application/json",
@@ -33,4 +36,8 @@ def archive(source, name="bundle"):
 
 
 if __name__ == "__main__":
-    archive("outputs/v1_4/platform-responses.json")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source", default="outputs/v1_4/platform-responses.json")
+    parser.add_argument("--experiment", default="EXP-009", choices=("EXP-009", "EXP-010"))
+    args = parser.parse_args()
+    archive(args.source, experiment=args.experiment)

@@ -14,6 +14,8 @@ Current status: **V1.1–V1.3 hourly Development backtests completed for 2021–
 
 The controlling deliverable is the user's current ALGOGENE official scoring template. Older repository plans, dates, candidate-team divisions, and research-stage assignments are retained as historical context only; they do not constrain current execution.
 
+Next registered controlled test: [EXP-010 EMA candidate with native fixed cost 1.0](experiments/EXP-010-ema-native-fee.md), same exact source as the zero-cost EMA candidate, Development 2021–2023 only. Its dedicated Actions workflow submits once and archives native submission IDs/results or failures. Initial status NOT RUN; no result or profitability assumption.
+
 ## V1.0
 
 V1.0 is a minimal compatibility experiment for BTCUSD:

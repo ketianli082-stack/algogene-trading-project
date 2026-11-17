@@ -1,0 +1,42 @@
+name: ALGOGENE EXP010 EMA candidate native-cost test
+on:
+  push:
+    branches: [codex/algogene-crypto-v1.0]
+    paths: [configs/exp010_ema_fee.json]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: algogene-cloud-backtest
+  cancel-in-progress: false
+jobs:
+  experiment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify guards without contacting ALGOGENE
+        run: python -m unittest discover -s tests
+      - name: Submit one controlled backtest and collect native evidence
+        env:
+          ALGOGENE_USER_ID: ${{ secrets.ALGOGENE_USER_ID }}
+          ALGOGENE_API_KEY: ${{ secrets.ALGOGENE_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python -u scripts/algogene_ema_fee.py
+      - name: Preserve complete or partial evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp010-native-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: outputs/exp010/
+          retention-days: 90
+      - name: Commit native result or failure record
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/archive_v1_4_results.py --experiment EXP-010 --source outputs/exp010/platform-responses.json
