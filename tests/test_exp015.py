@@ -41,8 +41,10 @@ class EXP015ScoreTests(unittest.TestCase):
             self.assertIn('interval="H"', item["submitted_source"])
             self.assertNotIn('"H4"', item["submitted_source"])
             differences = [k for k in ref if item["params"][k] != ref[k]]
-            self.assertEqual(differences, [] if index == 0 else [
-                "max_cost_ratio", "max_cost_ratio", "min_slope_atr", "min_breakout_atr"][index - 1])
+            expected = [] if index == 0 else [
+                ["max_cost_ratio"], ["max_cost_ratio"],
+                ["min_slope_atr"], ["min_breakout_atr"]][index - 1]
+            self.assertEqual(differences, expected)
 
     def test_score_ranking_excludes_empty_trade_and_excessive_loss(self):
         def row(name, score, count, dd, pnl):
