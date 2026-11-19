@@ -36,4 +36,4 @@ def archive(source, name):
 
 
 if __name__ == "__main__":
-    archive("outputs/exp019r/platform-responses.json", "final")
+    archive("outputs/exp019_2021_retry/platform-responses.json", "final")
