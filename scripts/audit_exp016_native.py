@@ -36,7 +36,8 @@ def audit(evidence, proportional_cost="0.0005"):
         raise ValueError("Platform fee mismatch is not the expected one")
     if any(not v for k, v in fast["setting_checks"].items() if k != "TradeCost"):
         raise ValueError("A second effective configuration setting differs")
-    if any(str(meta.get("contractSize")) != "1" for meta in fast["contract_metadata"].values()):
+    if any(Decimal(str(meta.get("contractSize"))) != Decimal("1")
+           for meta in fast["contract_metadata"].values()):
         raise ValueError("Cannot value fills with an unverified contract multiplier")
     rate = Decimal(str(proportional_cost))
     if rate < 0 or rate > Decimal("0.1"):
