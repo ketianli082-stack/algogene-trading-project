@@ -1,0 +1,100 @@
+{
+  "status": "DONE",
+  "backtest_id": "20261116_111622_055223",
+  "task_id": "1794827782055223",
+  "code_commit": "dd6af2c6a41574cee9e7a7f0f42d6aca9cc8ffa7",
+  "observations": [
+    "IN PROGRESS",
+    "IN PROGRESS",
+    "IN PROGRESS",
+    "IN PROGRESS",
+    "IN PROGRESS",
+    "IN PROGRESS",
+    "DONE"
+  ],
+  "data_role": "Development",
+  "version": "V1.1",
+  "last_endpoint": "/strategy_logs",
+  "contract": {
+    "contractSize": 1,
+    "settleCurrency": "USD",
+    "producttype": "SPOT"
+  },
+  "settings": {
+    "strategyName": "V1.1 H1 signals hourly Development EXP006",
+    "subscribeList": [
+      "BTCUSD"
+    ],
+    "StartDate": "2021-01",
+    "EndDate": "2023-12",
+    "InitialCapital": 10000,
+    "BaseCurrency": "USD",
+    "risk_free": 0,
+    "Leverage": 1,
+    "allowShortSell": false,
+    "dataset": 60,
+    "isPositionBaseEnv": false,
+    "isNewsFeedOn": false,
+    "isEconstatFeedon": false,
+    "isWeatherFeedOn": false
+  },
+  "metrics": {
+    "TradeCnt": 518,
+    "TotalPnL": -120.48370000000068,
+    "AnnualSharpe": -0.2519753977414355,
+    "DailySharpe": -0.015872958069772014,
+    "maxDrawdown_pct": 0.03820864142357594,
+    "maxDrawdown_amt": 387.3671999999988,
+    "simpleReturn": 0,
+    "WinRate": 0.3953934740882918
+  },
+  "effective_settings": {
+    "strategyName": "V1.1 H1 signals hourly Development EXP006",
+    "subscribeList": [
+      "BTCUSD"
+    ],
+    "StartDate": "2021-01",
+    "EndDate": "2023-12",
+    "InitialCapital": "10000.0",
+    "BaseCurrency": "USD",
+    "risk_free": "0.0",
+    "Leverage": "1.0",
+    "allowShortSell": "1.0",
+    "dataset": "60",
+    "isPositionBaseEnv": "False",
+    "isNewsFeedOn": "False",
+    "isEconstatFeedon": "False",
+    "isWeatherFeedOn": "False"
+  },
+  "effective_cost_settings": {
+    "TradeCost": "0.0",
+    "commission": "UNKNOWN",
+    "slippage": "UNKNOWN",
+    "funding": "UNKNOWN"
+  },
+  "period_matches_request": true,
+  "dataset_matches_request": true,
+  "evidence": {
+    "workflow_run_id": 43855705973,
+    "url": "https://github.com/ketianli082-stack/algogene-trading-project/actions/runs/43855705973",
+    "completed_at_utc": "2026-11-16T11:27:43Z"
+  },
+  "audit": {
+    "monthly_checkpoints": 36,
+    "open_fills": 259,
+    "close_fills": 259,
+    "unmatched_opens": 0,
+    "fill_price_pnl_usd": -121.8906999999999,
+    "platform_minus_fill_price_pnl_usd": 1.4069999999992149
+  },
+  "derived_metrics": {
+    "pnl_to_initial_capital_pct": -1.2048370000000068
+  },
+  "limitations": [
+    "TradeCost returned 0.0; commission/slippage/funding not independently verified",
+    "Platform simpleReturn=0.0 differs from arithmetic P/L-to-initial-capital ratio",
+    "Platform allowShortSell returns string 1.0 despite false request; strategy only opens longs",
+    "Platform TotalPnL exceeds reconstructed fill-price P/L by 1.407 USD; accounting difference not yet reconciled"
+  ],
+  "platform_logs_file": "EXP-006-platform-console.txt"
+}

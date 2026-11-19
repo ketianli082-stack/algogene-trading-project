@@ -22,8 +22,8 @@ Before V1.1: confirm the account actually honors the requested 2021 window. Hist
 
 ## Comparability and no look-ahead
 
-- All return comparisons use identical instrument, data interval (target H4), starting equity, cost model, leverage and flat initial positions. H4 must be verified in account; a different interval is a separately labeled experiment.
-- Account finding from EXP-005: native dataset=240 rejected; supported event datasets are 1, 5, 60 and 1440 minutes. Use dataset=60 with decisions every four hours and H4 historical candles for V1.1+ matched comparisons. This is an explicitly labeled execution-feed adaptation, not a native H4 backtest feed.
+- All return comparisons use identical instrument, data interval, starting equity, cost model, leverage and flat initial positions. User's latest choice on 2026-11-16: 60-minute indicator candles and decisions on every new hourly event (EXP-006).
+- The active V1.1+ baseline uses dataset=60, interval H and hourly decisions.
 - The cloud API dates are month-granular: 2021-01 to 2023-12; annual windows end in December. Save requested and effective platform settings separately.
 - Prior-year observations may warm up EMA200, Donchian and ATR. Indicators use only bars known as of the decision time. Exclude the signal bar from the breakout channel and verify completed-bar timestamp semantics before claiming no look-ahead.
 - Annual tests reset starting equity and position to the same values. A continuous three-year development run is a separate experiment; do not splice independent annual curves into a continuous-equity curve.

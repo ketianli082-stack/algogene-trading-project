@@ -1,0 +1,130 @@
+{
+  "primary_objective": "ALGOGENE native Score_Total",
+  "eligibility_rules": {
+    "status": "COLLECTED",
+    "min_transaction_events": 40,
+    "max_native_drawdown_pct_decimal": 0.03,
+    "min_native_total_pnl_USD": -100
+  },
+  "native_score_ranking": [
+    {
+      "name": "gate-tighten-07",
+      "native": {
+        "Score_Total": 41.66581705654704,
+        "score_AnnualSharpe": 46.91061420010718,
+        "score_AvgDrawdownDuration": 5.522594320507891,
+        "score_Rsquare": 70.52380803647567,
+        "score_TradePerDay": 0.20002678804145632,
+        "score_WinRate": 27.43102822239802,
+        "score_maxDrawdown_pct": 99.40683077175204,
+        "TotalPnL": -13.722400000000562,
+        "AnnualSharpe": -0.12373305207887682,
+        "maxDrawdown_pct": 0.005931692282479695,
+        "maxDrawdown_amt": 59.57690000000002,
+        "maxDrawdownDuration": 1044,
+        "TradeCnt": 32,
+        "profit_factor": 0.8237541003398449
+      },
+      "status": "COLLECTED",
+      "eligible": false,
+      "exclusions": [
+        "Fewer than 40 transaction events"
+      ],
+      "backtest_id": "20261117_112313_863074"
+    },
+    {
+      "name": "score-reference-08",
+      "native": {
+        "Score_Total": 41.41425444778467,
+        "score_AnnualSharpe": 42.7702082358874,
+        "score_AvgDrawdownDuration": 6.234565556019908,
+        "score_Rsquare": 66.60804604395818,
+        "score_TradePerDay": 1.733963779681907,
+        "score_WinRate": 32.74988266263992,
+        "score_maxDrawdown_pct": 98.38886040852071,
+        "TotalPnL": -68.73409999999967,
+        "AnnualSharpe": -0.2912328068710917,
+        "maxDrawdown_pct": 0.016111395914792936,
+        "maxDrawdown_amt": 162.6266999999989,
+        "maxDrawdownDuration": 991,
+        "TradeCnt": 100,
+        "profit_factor": 0.7453750335719653
+      },
+      "status": "COLLECTED",
+      "eligible": true,
+      "exclusions": [],
+      "backtest_id": "20261117_104521_591942"
+    },
+    {
+      "name": "gate08-breakout-005",
+      "native": {
+        "Score_Total": 41.26689957902545,
+        "score_AnnualSharpe": 39.08408485469193,
+        "score_AvgDrawdownDuration": 6.229879122881613,
+        "score_Rsquare": 71.10324621553907,
+        "score_TradePerDay": 1.5874391108409427,
+        "score_WinRate": 31.23314679086942,
+        "score_maxDrawdown_pct": 98.36360137932972,
+        "TotalPnL": -99.92720000000008,
+        "AnnualSharpe": -0.4437791258448626,
+        "maxDrawdown_pct": 0.016363986206702763,
+        "maxDrawdown_amt": 164.69980000000032,
+        "maxDrawdownDuration": 991,
+        "TradeCnt": 96,
+        "profit_factor": 0.6286729171861298
+      },
+      "status": "COLLECTED",
+      "eligible": true,
+      "exclusions": [],
+      "backtest_id": "20261117_115707_619963"
+    },
+    {
+      "name": "gate08-trend-slope-005",
+      "native": {
+        "Score_Total": 41.08571731682087,
+        "score_AnnualSharpe": 43.27595545538951,
+        "score_AvgDrawdownDuration": 6.234565556019908,
+        "score_Rsquare": 64.48349749426383,
+        "score_TradePerDay": 1.669959408518514,
+        "score_WinRate": 32.41281140489611,
+        "score_maxDrawdown_pct": 98.43751458183732,
+        "TotalPnL": -63.82300000000032,
+        "AnnualSharpe": -0.2706010073752423,
+        "maxDrawdown_pct": 0.015624854181626624,
+        "maxDrawdown_amt": 157.71559999999954,
+        "maxDrawdownDuration": 991,
+        "TradeCnt": 98,
+        "profit_factor": 0.7591870246317994
+      },
+      "status": "COLLECTED",
+      "eligible": true,
+      "exclusions": [],
+      "backtest_id": "20261117_114007_754211"
+    },
+    {
+      "name": "gate-relax-09",
+      "native": {
+        "Score_Total": 40.12528764344916,
+        "score_AnnualSharpe": 41.82383444057271,
+        "score_AvgDrawdownDuration": 6.234565556019908,
+        "score_Rsquare": 58.09028945604853,
+        "score_TradePerDay": 3.1943626776723413,
+        "score_WinRate": 33.578207414542156,
+        "score_maxDrawdown_pct": 97.83046631583936,
+        "TotalPnL": -84.29849999999897,
+        "AnnualSharpe": -0.3300093654332658,
+        "maxDrawdown_pct": 0.021695336841606405,
+        "maxDrawdown_amt": 218.99039999999877,
+        "maxDrawdownDuration": 991,
+        "TradeCnt": 136,
+        "profit_factor": 0.7572533024792861
+      },
+      "status": "COLLECTED",
+      "eligible": true,
+      "exclusions": [],
+      "backtest_id": "20261117_110419_306603"
+    }
+  ],
+  "top_eligible_candidate": "score-reference-08",
+  "caution": "Native score may reward steady losses; ranking is research-only, not an instruction to trade."
+}

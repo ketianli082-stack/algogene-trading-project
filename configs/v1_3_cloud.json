@@ -1,0 +1,16 @@
+{
+  "strategyName": "V1.3 H1 native ATR stop Development EXP008",
+  "subscribeList": ["BTCUSD"],
+  "StartDate": "2021-01",
+  "EndDate": "2023-12",
+  "InitialCapital": 10000,
+  "BaseCurrency": "USD",
+  "risk_free": 0,
+  "Leverage": 1,
+  "allowShortSell": false,
+  "dataset": 60,
+  "isPositionBaseEnv": false,
+  "isNewsFeedOn": false,
+  "isEconstatFeedon": false,
+  "isWeatherFeedOn": false
+}

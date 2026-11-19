@@ -1,0 +1,42 @@
+name: ALGOGENE EXP011 score-focused strategy combinations
+on:
+  push:
+    branches: [codex/algogene-crypto-v1.0]
+    paths: [configs/exp011_combinations.json]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: algogene-cloud-backtest
+  cancel-in-progress: false
+jobs:
+  combinations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify strategy guards without contacting ALGOGENE
+        run: python -m unittest discover -s tests
+      - name: Serial native backtests and immutable checkpoints
+        env:
+          ALGOGENE_USER_ID: ${{ secrets.ALGOGENE_USER_ID }}
+          ALGOGENE_API_KEY: ${{ secrets.ALGOGENE_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python -u scripts/algogene_combination_batch.py
+      - name: Preserve full or partial evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp011-native-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: outputs/exp011/
+          retention-days: 90
+      - name: Save native result bundle including failures
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/archive_v1_4_results.py --experiment EXP-011 --source outputs/exp011/platform-responses.json

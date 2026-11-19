@@ -1,0 +1,46 @@
+name: ALGOGENE EXP016 four-asset basis 2023-2025
+on:
+  push:
+    branches: [research/four-asset-basis-2023-2025]
+    paths: [configs/exp016_four_asset_basis.json]
+permissions:
+  contents: write
+concurrency:
+  group: algogene-cloud-backtest
+  cancel-in-progress: false
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 140
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Offline compile and unit tests, no API requests
+        run: |
+          python -m compileall -q src scripts tests
+          python -m unittest discover -s tests -v
+      - name: Sequential guarded ALGOGENE native four-asset backtests
+        env:
+          ALGOGENE_USER_ID: ${{ secrets.ALGOGENE_USER_ID }}
+          ALGOGENE_API_KEY: ${{ secrets.ALGOGENE_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python -u scripts/algogene_four_asset_run.py
+      - name: Upload redacted evidence even for aborted runs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp016-four-asset-${{ github.run_id }}-${{ github.run_attempt }}
+          path: outputs/exp016/platform-responses.json
+          retention-days: 90
+      - name: Archive immutable final native response or failure state
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          if test -f outputs/exp016/platform-responses.json; then
+            python scripts/archive_exp016.py
+          fi

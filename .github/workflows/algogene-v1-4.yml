@@ -1,0 +1,42 @@
+name: ALGOGENE V1.4 native-fee and robustness research
+on:
+  push:
+    branches: [codex/algogene-crypto-v1.0]
+    paths: [configs/v1_4_research.json]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: algogene-cloud-backtest
+  cancel-in-progress: false
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check experiment guards without contacting ALGOGENE
+        run: python -m unittest discover -s tests
+      - name: Sequential native cloud tests with immutable checkpoints
+        env:
+          ALGOGENE_USER_ID: ${{ secrets.ALGOGENE_USER_ID }}
+          ALGOGENE_API_KEY: ${{ secrets.ALGOGENE_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python -u scripts/algogene_research_batch.py
+      - name: Preserve partial results and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v1-4-platform-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: outputs/v1_4/
+          retention-days: 90
+      - name: Save final or interrupted batch evidence
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/archive_v1_4_results.py

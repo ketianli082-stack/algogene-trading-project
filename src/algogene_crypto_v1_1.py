@@ -1,4 +1,4 @@
-"""V1.1 fixed-size, long-only EMA200 / Donchian20 baseline. Backtest only."""
+"""V1.1 hourly fixed-size EMA200 / Donchian20 baseline. Backtest only."""
 from AlgoAPI import AlgoAPIUtil, AlgoAPI_Backtest
 from collections import deque
 from datetime import datetime, timedelta
@@ -60,13 +60,9 @@ class AlgoEvent:
     def on_marketdatafeed(self, md, ab):
         if md.instrument != "BTCUSD" or md.timestamp == self.last_event:
             return
-        # Account permits H1 events but not native 240-minute events. Keep
-        # decisions on four-hour boundaries and query H4 indicator candles.
-        if md.timestamp.hour % 4 != 0 or md.timestamp.minute != 0:
-            return
         self.last_event = md.timestamp
-        # Explicit terminal liquidation before the final H4 event; no new entries.
-        terminal = md.timestamp >= datetime(2023, 12, 31, 16)
+        # Explicit terminal liquidation before the final hourly event.
+        terminal = md.timestamp >= datetime(2023, 12, 31, 22)
         if terminal:
             if self.trade_id is not None and not self.pending:
                 self.send_exit()
@@ -75,7 +71,7 @@ class AlgoEvent:
             return
         try:
             history = self.evt.getHistoricalBar(
-                contract={"instrument": "BTCUSD"}, numOfBar=260, interval="H4")
+                contract={"instrument": "BTCUSD"}, numOfBar=260, interval="H")
             if not isinstance(history, dict):
                 raise ValueError("History is not a timestamp dictionary")
             # ALGOGENE documents close-time stamps. Strictly earlier timestamps
@@ -86,7 +82,7 @@ class AlgoEvent:
                 normalized[timestamp] = bar
             keys = sorted(t for t in normalized if t < md.timestamp)
             if self.first_history:
-                self.evt.consoleLog("V1.1_HISTORY", "interval=H4", "count=%s" % len(keys),
+                self.evt.consoleLog("V1.1_HISTORY", "interval=H", "count=%s" % len(keys),
                                     "first=%s" % (keys[0] if keys else "none"),
                                     "last=%s" % (keys[-1] if keys else "none"))
                 if len(keys) < 201:

@@ -2,9 +2,19 @@
 
 Active research design: **2021–2023 Development, 2024 Validation, 2025 Final Test**. V1.0–V1.4 are iterative strategy versions. See the controlling [research protocol](docs/research_protocol.md) and [machine-readable windows](configs/research_windows.json). V1.0 is being rerun on January 2021 with effective-date verification.
 
-Current status: **V1.0 January 2021 Development functional test passed** (2026-11-16 HKT). Backtest ID `20261116_102901_961717`; platform P/L +1.291985 USD. See [EXP-004](experiments/EXP-004-v1.0-development.md). Annual strategy returns remain NOT RUN.
+Active V1.1 setting: **60-minute BTCUSD candles and hourly decisions**, EMA200, Donchian20 entry / Donchian10 or EMA exit, fixed 0.01 lot, long-only. See [EXP-006](experiments/EXP-006-v1.1-hourly.md).
+
+V1.2 is registered in [EXP-007](experiments/EXP-007-v1.2-hourly.md): identical hourly signals and platform settings, ATR14-based opening quantity. Its Actions workflow automatically submits, waits, collects original platform responses and commits the evidence bundle. Platform-returned statistics are authoritative; no local P/L or return reconstruction for new runs.
+
+V1.3 is registered in [EXP-008](experiments/EXP-008-v1.3-hourly.md): keep V1.2 signals and ATR sizing; attach the platform-native stopLossLevel at ask minus 2×ATR14. The same automatic collection/archive process saves original platform outputs, without local metric recalculation.
+
+V1.2 and V1.3 now have automatically archived native results: [V1.2 evidence](experiments/EXP-007/runs/43883914291-attempt-1.json) and [V1.3 evidence](experiments/EXP-008/runs/43890469995-attempt-1.json). Both effective native TradeCost values are 0.0. [EXP-009](experiments/EXP-009-native-fees-robustness.md) registers a native fee API probe, independent annual runs, isolated stop sensitivity, and a 24-hour EMA slope filter. Its Actions workflow saves submission IDs and each row before continuing. New results remain NOT RUN until actual platform evidence arrives; 2024/2025 stay unused.
+
+Current status: **V1.1–V1.3 hourly Development backtests completed for 2021–2023**. V1.3 native TotalPnL is **51.5489 USD**, AnnualSharpe **0.1538017462**, maxDrawdown_pct **0.0163334286**, TradeCnt **326**, effective TradeCost **0.0**; these are platform fields, not recalculated metrics. V1.0 functional evidence remains in [EXP-004](experiments/EXP-004-v1.0-development.md). EXP-009's eight native experiments are now collected; [review and next-step proposal](experiments/EXP-009-review.md). Independent annual baseline results vary, and native fixed-cost 1.0 makes the baseline negative. EMA filtering is an unvalidated candidate: its cost test is NOT RUN. Validation and Final Test remain unused.
 
 The controlling deliverable is the user's current ALGOGENE official scoring template. Older repository plans, dates, candidate-team divisions, and research-stage assignments are retained as historical context only; they do not constrain current execution.
+
+Current review: [15 historical strategy records](experiments/history-through-EXP-011.md), including all four EXP-011 combinations, which were collected and all lost money. A higher native Score_Total did not guarantee better P/L; all failures remain archived. [EXP-012](experiments/EXP-012-history-research.md) now registers a native .001-quantity probe, optional fine-size EMA control, two native TP/hold-time variants and two flat-regime range variants. It addresses actual SKIP_SIZE logs without raising risk caps. All new results are NOT RUN until native evidence arrives. Same hourly data and fixed fee 1.0; 2024/2025 stay unused.
 
 ## V1.0
 
