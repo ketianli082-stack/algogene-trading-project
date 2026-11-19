@@ -1,0 +1,109 @@
+{
+  "experiment": "EXP-019",
+  "version": "Unmodified EXP-018 SHA-pinned calendar-window comparison",
+  "purpose": "Two truly separate native ALGOGENE runs: reset capital for 2025 only and replay full 2021-2025 without changing signal/position/exit code.",
+  "prior_exp018_backtest_id": "20261119_111256_911463",
+  "exp018_source_sha256": "6088dbe6abb48892d7e6de8bafdeb01b65a0e3f08178eb27927d5eb3cfed8b0f",
+  "settings": {
+    "strategyName": "EXP018 H1 risk repair",
+    "subscribeList": [
+      "BTCUSD",
+      "BTCUSDM",
+      "ETHUSD",
+      "ETHUSDM"
+    ],
+    "StartDate": "2023-01",
+    "EndDate": "2025-12",
+    "InitialCapital": 1000000,
+    "BaseCurrency": "USD",
+    "risk_free": 0,
+    "Leverage": 1,
+    "allowShortSell": true,
+    "dataset": 60,
+    "isPositionBaseEnv": false,
+    "isNewsFeedOn": false,
+    "isEconstatFeedon": false,
+    "isWeatherFeedOn": false,
+    "TradeCost": 1
+  },
+  "baseline_params": {
+    "lookback_h4": 42,
+    "entry_z": 2,
+    "exit_z": 0.4,
+    "stop_basis": 0.0075,
+    "max_hold_hours": 36,
+    "max_abs_basis": 0.025,
+    "max_h1_divergence": 0.01,
+    "max_daily_move": 0.06,
+    "min_edge": 0.002,
+    "gross_pair": 0.1,
+    "min_pair_notional": 1000,
+    "min_half_life": 0.75,
+    "max_half_life": 24,
+    "use_ou_gate": false,
+    "cooldown_hours": 18,
+    "stop_cooldown_hours": 48,
+    "max_h1_leg_move": 0.04,
+    "min_expected_profit_usd": 75
+  },
+  "candidates": [
+    {
+      "name": "year-2025",
+      "start": "2025-01",
+      "end": "2025-12",
+      "params": {
+        "lookback_h4": 42,
+        "entry_z": 2,
+        "exit_z": 0.4,
+        "stop_basis": 0.0075,
+        "max_hold_hours": 36,
+        "max_abs_basis": 0.025,
+        "max_h1_divergence": 0.01,
+        "max_daily_move": 0.06,
+        "min_edge": 0.002,
+        "gross_pair": 0.1,
+        "min_pair_notional": 1000,
+        "min_half_life": 0.75,
+        "max_half_life": 24,
+        "use_ou_gate": false,
+        "cooldown_hours": 18,
+        "stop_cooldown_hours": 48,
+        "max_h1_leg_move": 0.04,
+        "min_expected_profit_usd": 75
+      }
+    },
+    {
+      "name": "full-2021-2025",
+      "start": "2021-01",
+      "end": "2025-12",
+      "params": {
+        "lookback_h4": 42,
+        "entry_z": 2,
+        "exit_z": 0.4,
+        "stop_basis": 0.0075,
+        "max_hold_hours": 36,
+        "max_abs_basis": 0.025,
+        "max_h1_divergence": 0.01,
+        "max_daily_move": 0.06,
+        "min_edge": 0.002,
+        "gross_pair": 0.1,
+        "min_pair_notional": 1000,
+        "min_half_life": 0.75,
+        "max_half_life": 24,
+        "use_ou_gate": false,
+        "cooldown_hours": 18,
+        "stop_cooldown_hours": 48,
+        "max_h1_leg_move": 0.04,
+        "min_expected_profit_usd": 75
+      }
+    }
+  ],
+  "notes": [
+    "Exact submitted Python code SHA must match historical EXP018 archive; dates only change in native settings.",
+    "Two native runs start with independent USD 1000000 and fixed TradeCost USD1; 2025 standalone is NOT independent OOS because strategy selection already used 2025.",
+    "Backtest source has 2025-12-31 terminal liquidation; equal EndDate is intentional.",
+    "Review historical API warmup and source timestamps separately; never call H4 historical bars directly.",
+    "No unattended retry on ambiguous or completed task; serial tasks guard prevents duplicate live jobs."
+  ],
+  "trigger": "2026-11-19-repro-exp018-two-windows-01"
+}
