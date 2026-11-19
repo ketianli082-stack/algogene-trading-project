@@ -157,11 +157,26 @@ class AlgoEvent:
                        ("nav", "equity", "capital", "balance", "accountBalance")
                        if _finite_pos(_get(ab, k)) is not None), None)
         available = _finite_pos(_get(ab, "availableBalance"))
-        # Conservative: reject entry instead of inventing available capital.
+        # ALGOGENE documents availableBalance and marginUsed in 'ab'.
+        # Free cash + used margin approximates account equity when NAV absent.
+        # If marginUsed itself is missing, size against free cash only and do
+        # not infer a drawdown from margin-related cash movements.
+        self.equity_proxy = False
+        if equity is None and available is not None:
+            used = _get(ab, "marginUsed")
+            try:
+                used = float(used)
+                if not math.isfinite(used) or used < 0:
+                    used = None
+            except (TypeError, ValueError):
+                used = None
+            equity = available + (used or 0.0)
+            self.equity_proxy = used is None
         if equity is None or available is None:
             self._log("NO_CONFIRMED_BALANCE", "equity=", equity, "available=", available)
             return None, None
-        self.peak_equity = max(equity, self.peak_equity or equity)
+        if not self.equity_proxy:
+            self.peak_equity = max(equity, self.peak_equity or equity)
         return equity, available
 
     def _send_open(self, pair, spot_volume, perp_volume, direction, now, z):
@@ -212,6 +227,13 @@ class AlgoEvent:
 
     def on_orderfeed(self, of):
         sym = _get(of, "instrument")
+        if sym not in SYMBOLS:
+            ref = str(_get(of, "orderRef", ""))
+            sym = next((x for x in SYMBOLS if ref.endswith("-" + x)), None)
+        if sym not in SYMBOLS:
+            tid = _get(of, "tradeID")
+            sym = next((x for st in self.states.values()
+                        for x, known_tid in st["legs"].items() if known_tid == tid), None)
         pair = next((p for p, legs in PAIRS.items() if sym in legs), None)
         if pair is None:
             self._halt("UNMATCHED_ORDER_CALLBACK")
@@ -266,7 +288,7 @@ class AlgoEvent:
         equity, available = self._balances(ab)
         if equity is None:
             return
-        if self.peak_equity and equity < self.peak_equity * 0.88:
+        if not self.equity_proxy and self.peak_equity and equity < self.peak_equity * 0.88:
             self._halt("ACCOUNT_DRAWDOWN_12PCT")
             for pair, state in self.states.items():
                 if state["phase"] == "OPEN":
