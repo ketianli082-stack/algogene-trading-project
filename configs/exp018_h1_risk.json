@@ -58,7 +58,8 @@
       }
     }
   ],
-  "launch_version": "2026-11-19-exp018-one-risk-candidate-01",
+  "launch_version": "2026-11-19-exp018-resubmit-after-preflight-cancel-02",
   "approved_intervals": "H1 native dataset=60, historical H only, H4/H24 code aggregate",
-  "registered_cloud_submissions": 1
+  "registered_cloud_submissions": 1,
+  "relaunch_reason": "Previous Actions run 44511206107 was canceled during PREFLIGHT. Immutable final evidence contains only /get_current_tasks {status:true,res:[]}; no /run_backtest response, no Backtest ID or task ID. Explicit user request to run EXP-018 formally again. Keep strategy, settings, risk parameters, fixed USD1 TradeCost unchanged; 1 guarded submission maximum."
 }
