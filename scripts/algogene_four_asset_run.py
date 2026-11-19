@@ -148,7 +148,7 @@ def main():
                 spec = r.get("res", {})
                 cs = spec.get("contractSize")
                 if r.get("status") is not True or not isinstance(spec, dict) \
-                        or not isinstance(cs, (int, float)) or cs <= 0:
+                        or cs is None or not math.isfinite(float(cs)) or float(cs) <= 0:
                     raise ValueError("Instrument not verified: " + sym)
                 metadata[sym] = {k: spec.get(k) for k in
                                  ("contractSize", "settleCurrency", "producttype")}
