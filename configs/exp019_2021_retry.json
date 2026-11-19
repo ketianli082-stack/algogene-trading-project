@@ -80,5 +80,6 @@
     }
   ],
   "controls": "No changes to strategy Python, native fee, NAV or leverage. Only retry transient GET HTTP errors (408/429/500/502/503/504) once with ~75 second spacing. Never retry /run_backtest POST. Abort on account task busy.",
-  "trigger": "2026-11-19-exp019r-one-year-window-2021-2025-invocation-01"
+  "trigger": "2026-11-19-exp019r-2021-2025-formal-backtest-02",
+  "launch_note": "Confirmed initial EXP019 2021-2025 stage had HTTPError before /run_backtest; archive has no platform calls or task IDs. CI preflight tests now pass, launch isolated EXP019R with GET-only safe retry, never retry POST."
 }
