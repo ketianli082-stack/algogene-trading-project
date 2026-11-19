@@ -39,11 +39,17 @@ def _get(obj, key, default=None):
 
 def _dt(value):
     if isinstance(value, datetime):
-        return value
+        return datetime(value.year, value.month, value.day,
+                        value.hour, value.minute, value.second)
     if value is None:
         return None
     try:
-        return datetime.fromisoformat(str(value).replace("Z", "+00:00")).replace(tzinfo=None)
+        timestamp = str(value)
+        if timestamp[-1:] == "Z":
+            timestamp = timestamp[:-1] + "+00:00"
+        parsed = datetime.fromisoformat(timestamp)
+        return datetime(parsed.year, parsed.month, parsed.day,
+                        parsed.hour, parsed.minute, parsed.second)
     except (ValueError, TypeError):
         return None
 
@@ -184,8 +190,13 @@ class AlgoEvent:
         s, f = PAIRS[pair]
         state = self.states[pair]
         state["id"] += 1
-        state.update(phase="OPENING", legs={}, pending={s, f}, side=direction,
-                     opened=now.date(), pending_date=now.date(), entry_z=z)
+        state["phase"] = "OPENING"
+        state["legs"] = {}
+        state["pending"] = {s, f}
+        state["side"] = direction
+        state["opened"] = now.date()
+        state["pending_date"] = now.date()
+        state["entry_z"] = z
         for sym, vol, side in ((s, spot_volume, -direction), (f, perp_volume, direction)):
             try:
                 self.evt.sendOrder(AlgoAPIUtil.OrderObject(
@@ -229,7 +240,7 @@ class AlgoEvent:
         sym = _get(of, "instrument")
         if sym not in SYMBOLS:
             ref = str(_get(of, "orderRef", ""))
-            sym = next((x for x in SYMBOLS if ref.endswith("-" + x)), None)
+            sym = next((x for x in SYMBOLS if ref[-len(x) - 1:] == "-" + x), None)
         if sym not in SYMBOLS:
             tid = _get(of, "tradeID")
             sym = next((x for st in self.states.values()
@@ -252,15 +263,18 @@ class AlgoEvent:
                 self._emergency_close(pair)
                 return
             state["legs"][sym] = tid
-            state["pending"].remove(sym)
+            state["pending"] = {name for name in state["pending"] if name != sym}
             if not state["pending"]:
                 state["phase"] = "OPEN"
                 self._log("OPEN_CONFIRMED", pair, state["id"])
         elif state["phase"] == "CLOSING" and action == "close" and sym in state["pending"]:
-            state["legs"].pop(sym, None)
-            state["pending"].remove(sym)
+            del state["legs"][sym]
+            state["pending"] = {name for name in state["pending"] if name != sym}
             if not state["pending"]:
-                state.update(phase="FLAT", side=0, opened=None, entry_z=None)
+                state["phase"] = "FLAT"
+                state["side"] = 0
+                state["opened"] = None
+                state["entry_z"] = None
                 self._log("CLOSE_CONFIRMED", pair)
         else:
             self._halt("UNEXPECTED_ORDER_CALLBACK_" + str(pair))
