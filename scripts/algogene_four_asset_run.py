@@ -223,8 +223,10 @@ def main():
             row["effective_settings"] = effective
             row["setting_checks"] = checks
             logs = str(row["platform"].get("logs", [{}])[-1].get("res", ""))
+            trade_count = row["native_metrics"].get("TradeCnt")
             row["status"] = ("COLLECTED" if all(checks.values()) and
                              isinstance(row["native_metrics"].get("Score_Total"), (int, float))
+                             and isinstance(trade_count, (int, float)) and trade_count >= 4
                              and "FOUR_ASSET HALT" not in logs and "Traceback" not in logs
                              else "INVALID_REVIEW")
             save()
@@ -233,8 +235,15 @@ def main():
                 break
         except Exception as exc:
             row.update(status="ERROR", error_type=type(exc).__name__)
+            # Only log safe, source-controlled validation messages.
+            if isinstance(exc, ValueError):
+                detail = str(exc)
+                if detail.startswith(("Instrument not verified:", "Invalid platform task ID:",
+                                      "Account has an outstanding task", "Backtest configuration")):
+                    row["validation_error"] = detail[:180]
             save()
-            print("STOPPED", row["name"], type(exc).__name__, flush=True)
+            print("STOPPED", row["name"], type(exc).__name__,
+                  row.get("validation_error", ""), flush=True)
             break
     bundle["status"] = ("COLLECTED" if len(plan) == 2 and
                         all(r["status"] == "COLLECTED" for r in plan)
