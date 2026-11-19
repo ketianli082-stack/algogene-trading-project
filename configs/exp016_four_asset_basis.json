@@ -1,0 +1,58 @@
+{
+  "experiment": "EXP-016",
+  "version": "V8.0/V8.1 four-asset BTC ETH spot-perp",
+  "objective": "ALGOGENE native Score_Total",
+  "sample_design": "2023-2025 full-period in-sample candidate comparison, NOT untouched OOS",
+  "settings": {
+    "strategyName": "EXP016 BTC ETH dual-basis",
+    "subscribeList": [
+      "BTCUSD",
+      "BTCUSDM",
+      "ETHUSD",
+      "ETHUSDM"
+    ],
+    "StartDate": "2023-01",
+    "EndDate": "2025-12",
+    "InitialCapital": 1000000,
+    "BaseCurrency": "USD",
+    "risk_free": 0,
+    "Leverage": 1,
+    "allowShortSell": true,
+    "dataset": 1440,
+    "isPositionBaseEnv": false,
+    "isNewsFeedOn": false,
+    "isEconstatFeedon": false,
+    "isWeatherFeedOn": false,
+    "TradeCost": 0.0005
+  },
+  "candidates": [
+    {
+      "name": "dual-basis-fast",
+      "params": {
+        "lookback": 60,
+        "entry_z": 1.8,
+        "exit_z": 0.15,
+        "stop_z": 3.5,
+        "max_hold_days": 20,
+        "min_basis_edge": 0.0025,
+        "max_basis_vol": 0.04,
+        "gross_per_pair": 0.35
+      }
+    },
+    {
+      "name": "dual-basis-selective",
+      "params": {
+        "lookback": 90,
+        "entry_z": 2.2,
+        "exit_z": 0.15,
+        "stop_z": 3.5,
+        "max_hold_days": 15,
+        "min_basis_edge": 0.003,
+        "max_basis_vol": 0.03,
+        "gross_per_pair": 0.35
+      }
+    }
+  ],
+  "status": "NOT RUN",
+  "short_sell_caveat": "Native short-sell encoding returns numeric text even for older false inputs; verify actual accepted short fills."
+}
