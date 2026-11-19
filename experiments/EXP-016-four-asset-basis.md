@@ -45,3 +45,11 @@ No 2024 freeze or mandatory train/test split. Each signal uses historical comple
 ## Limitations
 
 Spot/futures listing is not proof that these particular contracts have complete compatible 2023–2025 bar data. Metadata, quantity unit, order execution/callback fields and access permissions require actual checking. Platform TradeCost=0.0005 unit and funding-rate treatment must be verified. If funding is not included in native PnL, the implemented model is spread mean reversion, NOT a fully modeled cash-and-carry strategy. A score selected from this same full-period sample is not an untouched holdout result.
+
+## Run evidence and compatibility fixes (2026-11-19)
+
+- [GitHub Actions #44460660539](https://github.com/ketianli082-stack/algogene-trading-project/actions/runs/44460660539): stopped before `/run_backtest`; the platform returns valid `/meta_instrument` data with a `res` object but without a required top-level `status`; the initial client erroneously rejected it. No Backtest ID.
+- [GitHub Actions #44475122402](https://github.com/ketianli082-stack/algogene-trading-project/actions/runs/44475122402): all four instruments pass metadata preflight (spot BTCUSD/ETHUSD, FUT BTCUSDM/ETHUSDM; all `contractSize=1`). ALGOGENE rejected the first candidate at submission: `Your script contains unauthorized modules or functions: .remove`. The second candidate was not submitted. No Backtest ID, no Score. The error is the official `msg` field, not a nonexistent `res` field.
+- Fixed `set.remove` and other unverified mutation/string methods in cloud-facing code. Added AST regression check so future candidates with the same known banned method patterns fail locally before API submission. Existing strategy parameters and experiment settings remain unchanged.
+
+The rejected submissions are programming/compatibility failures, **not market backtests**. Never rank or report them as a tested trading model. Only a subsequently collected native response with confirmed settings and actual fills may establish Score.
