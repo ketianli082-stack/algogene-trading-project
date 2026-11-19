@@ -40,7 +40,7 @@ class EXP019WindowsTest(unittest.TestCase):
         self.assertEqual([p["settings"]["Leverage"] for p in plan],[1,1])
         diffs=[k for k in plan[0]["settings"]
                if plan[0]["settings"][k]!=plan[1]["settings"][k]]
-        self.assertEqual(diffs,["StartDate","strategyName"])
+        self.assertEqual(set(diffs),{"StartDate","strategyName"})
 
     def test_evidence_guard_does_not_retry_and_reports_original_markers(self):
         code=R.read_text()
