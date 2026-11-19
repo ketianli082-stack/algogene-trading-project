@@ -146,6 +146,29 @@ class H1H4H24Guards(unittest.TestCase):
         self.assertEqual(len(e.evt.calls), 4)
         self.assertEqual(e.states["BTC"]["cooldown_until"], t + timedelta(hours=12))
 
+    def test_sync_within_btc_pair_trades_when_global_sync_false(self):
+        # ALGOGENE isSync=False only means the whole four-asset basket
+        # is not aligned; one fully aligned pair may still manage risk.
+        e = m.AlgoEvent()
+        e.evt = DummyHandler()
+        now = datetime(2023, 6, 1, 6)
+        e.states["BTC"]["phase"] = "OPEN"
+        e.states["BTC"]["legs"] = {"BTCUSD": 101, "BTCUSDM": 102}
+        e.states["BTC"]["opened"] = now - timedelta(hours=2)
+        e.states["BTC"]["entry_basis"] = 0.01
+        e.states["BTC"]["side"] = -1
+        b = {
+            "BTCUSD": {"timestamp": now, "lastPrice": 100},
+            "BTCUSDM": {"timestamp": now, "lastPrice": 103},
+            "ETHUSD": {"timestamp": now, "lastPrice": 100},
+            "ETHUSDM": {"timestamp": now - timedelta(hours=1), "lastPrice": 100},
+        }
+        e.on_bulkdatafeed(False, b, {"NAV": 1000000, "availableBalance": 900000})
+        self.assertEqual(e.states["BTC"]["phase"], "CLOSING")
+        self.assertEqual(len(e.evt.calls), 2)
+        self.assertEqual(e.pair_last_hour["BTC"], now)
+        self.assertIsNone(e.pair_last_hour["ETH"])
+
     def test_rejected_second_leg_halts_new_orders(self):
         e = m.AlgoEvent()
         e.evt = DummyHandler()
