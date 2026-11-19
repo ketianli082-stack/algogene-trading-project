@@ -1,0 +1,84 @@
+{
+  "experiment": "EXP-019R",
+  "version": "Exact original EXP018 code, 2021–2025 only, HTTP GET diagnostics/retry",
+  "requested_by_user": "Re-run previously missing 2021–2025 half of EXP019",
+  "earlier_failed_workflow": "https://github.com/ketianli082-stack/algogene-trading-project/actions/runs/44518543860",
+  "earlier_failure": {
+    "attempted": "2021–2025",
+    "preflight_state": "No /get_current_tasks response archived; no native backtest submission for 2021–2025",
+    "failure_type": "HTTPError",
+    "http_status": "not recorded by earlier runner"
+  },
+  "exp018_source_sha256": "6088dbe6abb48892d7e6de8bafdeb01b65a0e3f08178eb27927d5eb3cfed8b0f",
+  "settings": {
+    "strategyName": "EXP018 H1 risk repair",
+    "subscribeList": [
+      "BTCUSD",
+      "BTCUSDM",
+      "ETHUSD",
+      "ETHUSDM"
+    ],
+    "StartDate": "2021-01",
+    "EndDate": "2025-12",
+    "InitialCapital": 1000000,
+    "BaseCurrency": "USD",
+    "risk_free": 0,
+    "Leverage": 1,
+    "allowShortSell": true,
+    "dataset": 60,
+    "isPositionBaseEnv": false,
+    "isNewsFeedOn": false,
+    "isEconstatFeedon": false,
+    "isWeatherFeedOn": false,
+    "TradeCost": 1
+  },
+  "baseline_params": {
+    "lookback_h4": 42,
+    "entry_z": 2,
+    "exit_z": 0.4,
+    "stop_basis": 0.0075,
+    "max_hold_hours": 36,
+    "max_abs_basis": 0.025,
+    "max_h1_divergence": 0.01,
+    "max_daily_move": 0.06,
+    "min_edge": 0.002,
+    "gross_pair": 0.1,
+    "min_pair_notional": 1000,
+    "min_half_life": 0.75,
+    "max_half_life": 24,
+    "use_ou_gate": false,
+    "cooldown_hours": 18,
+    "stop_cooldown_hours": 48,
+    "max_h1_leg_move": 0.04,
+    "min_expected_profit_usd": 75
+  },
+  "candidates": [
+    {
+      "name": "full-2021-2025",
+      "start": "2021-01",
+      "end": "2025-12",
+      "params": {
+        "lookback_h4": 42,
+        "entry_z": 2,
+        "exit_z": 0.4,
+        "stop_basis": 0.0075,
+        "max_hold_hours": 36,
+        "max_abs_basis": 0.025,
+        "max_h1_divergence": 0.01,
+        "max_daily_move": 0.06,
+        "min_edge": 0.002,
+        "gross_pair": 0.1,
+        "min_pair_notional": 1000,
+        "min_half_life": 0.75,
+        "max_half_life": 24,
+        "use_ou_gate": false,
+        "cooldown_hours": 18,
+        "stop_cooldown_hours": 48,
+        "max_h1_leg_move": 0.04,
+        "min_expected_profit_usd": 75
+      }
+    }
+  ],
+  "controls": "No changes to strategy Python, native fee, NAV or leverage. Only retry transient GET HTTP errors (408/429/500/502/503/504) once with ~75 second spacing. Never retry /run_backtest POST. Abort on account task busy.",
+  "trigger": "2026-11-19-exp019r-one-year-window-2021-2025-invocation-01"
+}
