@@ -144,7 +144,7 @@ class H1H4H24Guards(unittest.TestCase):
                 status="success", openclose="close", tradeID="trade-" + sym))
         self.assertEqual(e.states["BTC"]["phase"], "FLAT")
         self.assertEqual(len(e.evt.calls), 4)
-        self.assertEqual(e.states["BTC"]["cooldown_until"], t + timedelta(hours=12))
+        self.assertEqual(e.states["BTC"]["cooldown_until"], t + timedelta(hours=18))
 
     def test_open_position_exits_on_h1_reversion_not_only_h4(self):
         e = m.AlgoEvent()
