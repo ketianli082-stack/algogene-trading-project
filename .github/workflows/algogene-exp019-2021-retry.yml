@@ -1,0 +1,46 @@
+name: ALGOGENE EXP019R 2021-2025 standalone retry
+on:
+  push:
+    branches: [research/four-asset-basis-2023-2025]
+    paths: [configs/exp019_2021_retry.json]
+permissions:
+  contents: write
+concurrency:
+  group: algogene-cloud-backtest
+  cancel-in-progress: false
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 225
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile and validate source offline, before any API calls
+        run: |
+          python -m compileall -q src scripts tests
+          python -m unittest discover -s tests -v
+      - name: Retry ONE EXP018-unchanged native 2021-2025 ALGOGENE backtest
+        env:
+          ALGOGENE_USER_ID: ${{ secrets.ALGOGENE_USER_ID }}
+          ALGOGENE_API_KEY: ${{ secrets.ALGOGENE_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python -u scripts/algogene_exp019_2021_retry.py
+      - name: Upload redacted platform evidence, even if run failed
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp019r-2021-2025-${{ github.run_id }}-${{ github.run_attempt }}
+          path: outputs/exp019_2021_retry/platform-responses.json
+          retention-days: 90
+      - name: Archive immutable native evidence or HTTP error
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          if test -f outputs/exp019_2021_retry/platform-responses.json; then
+            python scripts/archive_exp019_2021_retry.py
+          fi
