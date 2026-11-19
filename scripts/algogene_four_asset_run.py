@@ -4,6 +4,7 @@ Only uses the backtest REST endpoints; never calls live order APIs.
 Records the unmodified native Score_Total and performance as evidence.
 An ambiguous submission or collection failure stops further candidates.
 """
+import ast
 import hashlib
 import json
 import math
@@ -71,6 +72,17 @@ def build_plan():
                 raise ValueError("Missing strategy parameter: " + key)
         source = template.replace(PARAM_LINE, "PARAMS = " + repr(p), 1)
         compile(source, "exp016-submission.py", "exec")
+        # Local compilation is insufficient: ALGOGENE applies an independent
+        # attribute-call allowlist. The earlier platform rejection specifically
+        # named .remove. Refuse known risky patterns BEFORE any API request.
+        tree = ast.parse(source, filename="exp016-submission.py")
+        banned = {"remove", "pop", "update", "replace", "endswith"}
+        invalid = sorted({node.func.attr for node in ast.walk(tree)
+                          if isinstance(node, ast.Call)
+                          and isinstance(node.func, ast.Attribute)
+                          and node.func.attr in banned})
+        if invalid:
+            raise ValueError("ALGOGENE blocked-method candidates: " + ",".join(invalid))
         rows.append({"name": c["name"], "params": p, "settings": dict(
             settings, strategyName="EXP016 " + c["name"]),
             "source": source, "source_sha256": hashlib.sha256(
@@ -162,7 +174,14 @@ def main():
                           "settings": row["settings"]}, "submission", row, post=True)
             if result.get("status") is not True:
                 row["status"] = "SUBMISSION_REJECTED"
+                detail = result.get("msg", result.get("res", "No detail"))
+                if isinstance(detail, str):
+                    # Result already saved in redacted response; no credentials
+                    # or raw submitted code in console logs.
+                    row["submission_rejection_summary"] = scrub(detail[:400], secrets)
                 save()
+                print("SUBMISSION_REJECTED", row["name"],
+                      row.get("submission_rejection_summary", ""), flush=True)
                 break
             for field, dest in (("runtime_id", "backtest_id"), ("task_id", "task_id")):
                 value = result.get(field)
