@@ -1,4 +1,5 @@
 """Offline guards for the four-asset strategy (no ALGOGENE credentials needed)."""
+import ast
 import importlib.util
 import math
 from datetime import datetime, timedelta
@@ -36,6 +37,24 @@ class FakeHandler:
 
 
 class FourAssetGuards(unittest.TestCase):
+    def test_platform_rejected_method_calls_are_absent(self):
+        # EXP016 run 44475122402 was rejected by ALGOGENE because the
+        # strategy called set.remove(). Compilation alone cannot catch this.
+        # Restrict several mutable-container and string convenience methods
+        # from cloud-facing code until platform support is established.
+        source = path.read_text(encoding="utf-8")
+        tree = ast.parse(source)
+        banned = {"remove", "pop", "update", "replace", "endswith"}
+        found = sorted({node.func.attr for node in ast.walk(tree)
+                        if isinstance(node, ast.Call)
+                        and isinstance(node.func, ast.Attribute)
+                        and node.func.attr in banned})
+        self.assertEqual(found, [], "ALGOGENE blocked-method candidates: " + str(found))
+
+    def test_utc_timestamp_safely_parses_without_replacement(self):
+        self.assertEqual(mod._dt("2023-05-06T01:02:03Z"),
+                         datetime(2023, 5, 6, 1, 2, 3))
+
     def test_positive_basis_and_no_future_in_training(self):
         spot = [100.0] * 62
         futures = [100.0 * math.exp((i % 6) * 0.001) for i in range(61)]
