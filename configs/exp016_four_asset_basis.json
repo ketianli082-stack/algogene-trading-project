@@ -54,5 +54,7 @@
     }
   ],
   "status": "NOT RUN",
-  "short_sell_caveat": "Native short-sell encoding returns numeric text even for older false inputs; verify actual accepted short fills."
+  "short_sell_caveat": "Native short-sell encoding returns numeric text even for older false inputs; verify actual accepted short fills.",
+  "relaunch_reason": "EXP-016 run 44460660539 stopped before /run_backtest because metadata res-only response lacked top-level status; fixed preflight; neither model previously submitted",
+  "launch_version": "2026-11-19-meta-res-only-fix-01"
 }
