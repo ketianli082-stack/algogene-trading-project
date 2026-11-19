@@ -166,6 +166,7 @@ def _snapshot(bd, pair):
 class AlgoEvent:
     def __init__(self):
         self.last_hour = None
+        self.pair_last_hour = {"BTC": None, "ETH": None}
         self.peak_nav = None
         self.halted = False
         self.spec = {}
@@ -333,7 +334,7 @@ class AlgoEvent:
             state["pending"] = {x for x in state["pending"] if x != symbol}
             if not state["pending"]:
                 state["phase"] = "FLAT"
-                state["cooldown_until"] = self.last_hour + timedelta(
+                state["cooldown_until"] = self.pair_last_hour[pair] + timedelta(
                     hours=PARAMS["cooldown_hours"])
                 state["opened"] = None
                 state["entry_basis"] = None
@@ -344,17 +345,33 @@ class AlgoEvent:
             self._rescue(pair)
 
     def on_bulkdatafeed(self, isSync, bd, ab):
-        if not isSync or not isinstance(bd, dict) or any(x not in bd for x in SYMBOLS):
+        if not isinstance(bd, dict):
             return
-        stamps = [_time(_get(bd[x], "timestamp")) for x in SYMBOLS]
-        if any(t is None for t in stamps) or len(set(stamps)) != 1:
+        # isSync describes synchrony across ALL subscribed instruments.
+        # BTC and ETH pairs can be synchronized independently even when
+        # isSync=False because the other pair is stale; never use a stale leg.
+        active = {}
+        for pair, (spot, future) in PAIRS.items():
+            if spot not in bd or future not in bd:
+                continue
+            ts = _time(_get(bd[spot], "timestamp"))
+            tf = _time(_get(bd[future], "timestamp"))
+            if ts is None or tf != ts or ts.minute != 0 or ts.second != 0:
+                continue
+            previous = self.pair_last_hour[pair]
+            if previous is None or ts > previous:
+                active[pair] = ts
+        if not active:
             return
-        now = stamps[0]
-        if now == self.last_hour or now.minute != 0 or now.second != 0:
-            return
+        now = max(active.values())
         self.last_hour = now
+        for pair, ts in active.items():
+            self.pair_last_hour[pair] = ts
         for pair, state in self.states.items():
-            if state["phase"] in ("OPENING", "CLOSING") and state["pending_at"] < now:
+            ts = active.get(pair)
+            if (ts is not None and state["phase"] in ("OPENING", "CLOSING")
+                    and state["pending_at"] is not None
+                    and state["pending_at"] < ts):
                 self._halt("PENDING_ORDER_OVER_HOUR_" + pair)
                 self._rescue(pair)
         if self.halted:
@@ -373,22 +390,24 @@ class AlgoEvent:
                     if st["phase"] == "OPEN":
                         self._close(pair, "account_risk", now)
                 return
-        h4_event = now.hour % 4 == 1
-        if h4_event and now < END:
-            for pair in PAIRS:
+        for pair, ts in active.items():
+            if ts.hour % 4 == 1 and ts < END:
                 try:
-                    self.cached[pair] = self._history_pair(pair, now)
+                    self.cached[pair] = self._history_pair(pair, ts)
                 except Exception as exc:
                     self.cached[pair] = None
                     self._log("SIGNAL_SKIP", pair, type(exc).__name__, str(exc)[:80])
 
-        for pair, st in self.states.items():
+        for pair, now in active.items():
+            st = self.states[pair]
+            h4_event = now.hour % 4 == 1
             snapshot = _snapshot(bd, pair)
             if snapshot is None:
                 continue
             basis = snapshot["basis"]
             if st["phase"] == "OPEN":
-                held = (now - st["opened"]).total_seconds() / 3600.0
+                elapsed = now - st["opened"]
+                held = elapsed.days * 24 + elapsed.seconds / 3600.0
                 adverse = -st["side"] * (basis - st["entry_basis"])
                 if adverse >= PARAMS["stop_basis"]:
                     self._close(pair, "BASIS_STOP", now)
