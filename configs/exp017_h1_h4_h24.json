@@ -1,0 +1,59 @@
+{
+  "experiment": "EXP-017",
+  "version": "V9.0-H1-H4-H24-guarded",
+  "objective": "ALGOGENE native Score_Total with mandatory capital, fee, drawdown and fill integrity checks",
+  "sample_design": "2023-2025 full-period baseline comparison; in-sample development; no holdout claim",
+  "reference": {
+    "exp016_native_backtest_id": "20261119_071235_471828",
+    "exp016_score_total": 44.159611865031195,
+    "exp016_native_total_pnl": -50158.28580199997,
+    "exp016_effective_fee": 1
+  },
+  "settings": {
+    "strategyName": "EXP017 H1 H4 H24 guarded",
+    "subscribeList": [
+      "BTCUSD",
+      "BTCUSDM",
+      "ETHUSD",
+      "ETHUSDM"
+    ],
+    "StartDate": "2023-01",
+    "EndDate": "2025-12",
+    "InitialCapital": 1000000,
+    "BaseCurrency": "USD",
+    "risk_free": 0,
+    "Leverage": 1,
+    "allowShortSell": true,
+    "dataset": 60,
+    "isPositionBaseEnv": false,
+    "isNewsFeedOn": false,
+    "isEconstatFeedon": false,
+    "isWeatherFeedOn": false,
+    "TradeCost": 1
+  },
+  "candidates": [
+    {
+      "name": "h1-h4-h24-guarded",
+      "params": {
+        "lookback_h4": 42,
+        "entry_z": 2,
+        "exit_z": 0.4,
+        "stop_basis": 0.012,
+        "max_hold_hours": 48,
+        "max_abs_basis": 0.035,
+        "max_h1_divergence": 0.025,
+        "max_daily_move": 0.1,
+        "min_edge": 0.002,
+        "gross_pair": 0.15,
+        "min_pair_notional": 1000,
+        "min_half_life": 0.75,
+        "max_half_life": 24,
+        "use_ou_gate": false,
+        "cooldown_hours": 12
+      }
+    }
+  ],
+  "launch_version": "2026-11-19-first-native-h1-single-candidate-01",
+  "approved_intervals": "H1 dataset=60 and H historical only; H4/H24 code aggregation",
+  "registered_cloud_submissions": 1
+}
