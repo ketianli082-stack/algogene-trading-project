@@ -55,6 +55,6 @@
   ],
   "status": "NOT RUN",
   "short_sell_caveat": "Native short-sell encoding returns numeric text even for older false inputs; verify actual accepted short fills.",
-  "relaunch_reason": "EXP-016 run 44460660539 stopped before /run_backtest because metadata res-only response lacked top-level status; fixed preflight; neither model previously submitted",
-  "launch_version": "2026-11-19-meta-res-only-fix-01"
+  "relaunch_reason": "EXP-016 run 44475122402 returned explicit status:false with msg 'Your script contains unauthorized modules or functions: .remove'. Rejected before task creation: task_id empty. Removed prohibited calls, added AST check and updated error capture; user settings and candidate parameters unchanged.",
+  "launch_version": "2026-11-19-ast-allowlist-fix-01"
 }
