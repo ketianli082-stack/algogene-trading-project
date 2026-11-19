@@ -1,0 +1,46 @@
+name: ALGOGENE EXP018 H1 risk repair four-asset
+on:
+  push:
+    branches: [research/four-asset-basis-2023-2025]
+    paths: [configs/exp018_h1_risk.json]
+permissions:
+  contents: write
+concurrency:
+  group: algogene-cloud-backtest
+  cancel-in-progress: false
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 125
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile and test source offline, zero API requests
+        run: |
+          python -m compileall -q src scripts tests
+          python -m unittest discover -s tests -v
+      - name: One guarded native ALGOGENE H1 risk backtest
+        env:
+          ALGOGENE_USER_ID: ${{ secrets.ALGOGENE_USER_ID }}
+          ALGOGENE_API_KEY: ${{ secrets.ALGOGENE_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python -u scripts/algogene_h1_exp018_run.py
+      - name: Upload evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp018-h1-h4-h24-${{ github.run_id }}-${{ github.run_attempt }}
+          path: outputs/exp018/platform-responses.json
+          retention-days: 90
+      - name: Archive immutable native response or failure
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          if test -f outputs/exp018/platform-responses.json; then
+            python scripts/archive_exp018.py
+          fi
