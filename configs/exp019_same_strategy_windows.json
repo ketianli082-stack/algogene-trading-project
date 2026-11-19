@@ -105,5 +105,6 @@
     "Review historical API warmup and source timestamps separately; never call H4 historical bars directly.",
     "No unattended retry on ambiguous or completed task; serial tasks guard prevents duplicate live jobs."
   ],
-  "trigger": "2026-11-19-repro-exp018-two-windows-01"
+  "trigger": "2026-11-19-relaunch-after-pre-submit-test-order-fix-02",
+  "relaunch_reason": "First run 44518399651 failed exclusively at offline unit assertion about settings-key insertion ordering; ALGOGENE native submission step was skipped and no Backtest ID exists. Commit afaae8bbc... fixed test only. Source and both calendar-window native settings unchanged."
 }
