@@ -200,11 +200,21 @@ def main():
                 if key == "strategyName":
                     continue
                 actual = effective.get(key) if isinstance(effective, dict) else None
-                if key in ("Leverage", "TradeCost", "InitialCapital"):
+                if key in ("Leverage", "TradeCost", "InitialCapital", "dataset", "risk_free"):
                     try:
                         checks[key] = math.isclose(float(actual), float(value), rel_tol=1e-8)
                     except (TypeError, ValueError):
                         checks[key] = False
+                elif key == "allowShortSell":
+                    # Native API serializes this flag as a numeric string.
+                    # Earlier experiments showed "1.0" even for false, so
+                    # success is only encoding compatibility, NOT proof shorts fill.
+                    try:
+                        checks[key] = float(actual) == 1.0 and value is True
+                    except (TypeError, ValueError):
+                        checks[key] = False
+                elif isinstance(value, bool):
+                    checks[key] = str(actual).lower() == str(value).lower()
                 else:
                     checks[key] = actual == value
             row["effective_settings"] = effective
