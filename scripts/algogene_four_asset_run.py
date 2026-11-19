@@ -147,7 +147,10 @@ def main():
                 r = call("/meta_instrument", {"instrument": sym}, "meta_" + sym, row)
                 spec = r.get("res", {})
                 cs = spec.get("contractSize")
-                if r.get("status") is not True or not isinstance(spec, dict) \
+                # ALGOGENE /meta_instrument may return {"res": {...}} without
+                # a top-level "status" key. Accept a valid populated res;
+                # reject an explicit status=False or invalid contract size.
+                if r.get("status") is False or not isinstance(spec, dict) \
                         or cs is None or not math.isfinite(float(cs)) or float(cs) <= 0:
                     raise ValueError("Instrument not verified: " + sym)
                 metadata[sym] = {k: spec.get(k) for k in
