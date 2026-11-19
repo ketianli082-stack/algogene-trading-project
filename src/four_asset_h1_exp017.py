@@ -334,8 +334,9 @@ class AlgoEvent:
             state["pending"] = {x for x in state["pending"] if x != symbol}
             if not state["pending"]:
                 state["phase"] = "FLAT"
-                state["cooldown_until"] = self.pair_last_hour[pair] + timedelta(
-                    hours=PARAMS["cooldown_hours"])
+                when = self.pair_last_hour[pair] or self.last_hour
+                state["cooldown_until"] = (when + timedelta(hours=PARAMS["cooldown_hours"])
+                                           if when is not None else None)
                 state["opened"] = None
                 state["entry_basis"] = None
                 state["side"] = 0
