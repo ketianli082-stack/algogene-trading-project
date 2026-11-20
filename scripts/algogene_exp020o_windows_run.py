@@ -341,7 +341,9 @@ def main():
             print("STOPPED", row["name"], type(exc).__name__,
                   row.get("validation_error", ""), flush=True)
             break
-    bundle["status"] = ("COLLECTED" if len(plan) == 2 and
+    # Respect an explicitly selected single window as well as the original two-window plan.
+    # A completed single-window retry must not be marked failed for lacking the other window.
+    bundle["status"] = ("COLLECTED" if plan and
                         all(r["status"] == "COLLECTED" for r in plan)
                         else "STOPPED")
     ranked = [r for r in plan if r["status"] == "COLLECTED"]
