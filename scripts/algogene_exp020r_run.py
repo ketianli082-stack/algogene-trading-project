@@ -249,20 +249,30 @@ def main():
             # hour. Native score is pre-proportional-fee and must be labelled.
             raw_logs = str(row["platform"]["logs"][-1].get("res", ""))
             matches = re.findall(
-                r"EXP020, COST_FINAL, ([0-9.]+), ([-0-9.]+), ([-0-9.]+), ([0-9]+), (\{[^\n]*\})",
+                r"EXP020R, COST_FINAL, ([0-9.]+), ([-0-9.]+), ([-0-9.]+), ([0-9]+), (\{[^\n]*\}), ([0-9.]+)",
                 raw_logs)
             if matches:
-                paid, gross, shadow_net, events, annual = matches[-1]
+                paid, gross, net, events, annual, native_paid = matches[-1]
+                native_pnl = float(row["native_metrics"]["TotalPnL"])
+                # IMPORTANT: calculate native platform fee separately, then
+                # REPLACE (not stack) it with the 0.05% simulated fee.
+                adjusted_net = native_pnl + float(native_paid) - float(paid)
                 row["percent_fee_audit"] = {
                     "fee_rate": 0.0005,
                     "actual_fill_fee_total_usd": float(paid),
                     "independent_realized_gross_usd": float(gross),
-                    "internal_net_after_fee_usd": float(shadow_net),
+                    "independent_economic_net_usd": float(net),
+                    "actual_platform_native_fee_usd": float(native_paid),
+                    "native_forced_fee_per_open": 1.0,
                     "fill_events": int(events),
                     "by_year": ast.literal_eval(annual),
                     "native_score_is_before_internal_fee": True,
-                    "cost_adjusted_native_net_pnl_usd":
-                        row["native_metrics"]["TotalPnL"] - float(paid)}
+                    "cost_adjusted_native_net_pnl_usd": adjusted_net,
+                    "gross_reconcile": math.isclose(native_pnl + float(native_paid),
+                                                   float(gross), abs_tol=0.03),
+                    "net_reconcile": math.isclose(adjusted_net,float(net),abs_tol=0.03),
+                    "reconciled_native_fee_events": math.isclose(
+                        float(native_paid), float(events) * 0.5, abs_tol=0.03)}
             effective = statistics.get("setting", statistics.get("settings", {}))
             checks = {}
             for key, value in row["settings"].items():
@@ -290,16 +300,32 @@ def main():
             row["setting_checks"] = checks
             logs = str(row["platform"].get("logs", [{}])[-1].get("res", ""))
             trade_count = row["native_metrics"].get("TradeCnt")
-            row["status"] = ("COLLECTED" if all(checks.values()) and
-                             isinstance(row["native_metrics"].get("Score_Total"), (int, float))
-                             and isinstance(trade_count, (int, float)) and trade_count >= 4
-                             and "EXP020R, HALT" not in logs and "Traceback" not in logs
-                             and "PAIR_CONFIRMED" in logs and "COST_FINAL" in logs
-                             and "percent_fee_audit" in row
-                             else "INVALID_REVIEW")
+            # Requested zero is NOT respected by ALGOGENE. Do not mark it as
+            # a match; document the server-imposed floor and only accept
+            # economic fee reporting when the independently signed fills reconcile.
+            fee_audit = row.get("percent_fee_audit", {})
+            forced_native_one = (row["settings"]["TradeCost"] == 0
+                                 and str(effective.get("TradeCost")) in ("1.0", "1"))
+            nonfee_matches = all(value for key,value in checks.items() if key != "TradeCost")
+            reconcilable = (fee_audit.get("gross_reconcile") is True
+                            and fee_audit.get("net_reconcile") is True
+                            and fee_audit.get("reconciled_native_fee_events") is True
+                            and math.isclose(
+                                float(fee_audit.get("fill_events", -1)),
+                                float(trade_count), abs_tol=0.01))
+            row["native_fee_override_observed"] = forced_native_one
+            row["native_zero_request_honored"] = checks.get("TradeCost", False)
+            row["status"] = (
+                "COLLECTED_WITH_NATIVE_FEE_FLOOR" if
+                forced_native_one and nonfee_matches and reconcilable
+                and isinstance(row["native_metrics"].get("Score_Total"), (int, float))
+                and isinstance(trade_count, (int, float)) and trade_count >= 4
+                and "EXP020R, HALT" not in logs and "Traceback" not in logs
+                and "PAIR_CONFIRMED" in logs and "COST_FINAL" in logs
+                else "INVALID_REVIEW")
             save()
             archive(OUT / "platform-responses.json", "collected-" + row["name"])
-            if row["status"] != "COLLECTED":
+            if row["status"] != "COLLECTED_WITH_NATIVE_FEE_FLOOR":
                 break
         except Exception as exc:
             row.update(status="ERROR", error_type=type(exc).__name__)
@@ -318,16 +344,16 @@ def main():
             print("STOPPED", row["name"], type(exc).__name__,
                   row.get("validation_error", ""), flush=True)
             break
-    bundle["status"] = ("COLLECTED" if len(plan) == 1 and
-                        all(r["status"] == "COLLECTED" for r in plan)
+    bundle["status"] = ("COLLECTED_WITH_NATIVE_FEE_FLOOR" if len(plan) == 1 and
+                        all(r["status"] == "COLLECTED_WITH_NATIVE_FEE_FLOOR" for r in plan)
                         else "STOPPED")
-    ranked = [r for r in plan if r["status"] == "COLLECTED"]
+    ranked = [r for r in plan if r["status"] == "COLLECTED_WITH_NATIVE_FEE_FLOOR"]
     ranked.sort(key=lambda r: r["native_metrics"]["Score_Total"], reverse=True)
     bundle["native_score_ranking"] = [
         {"name": r["name"], "backtest_id": r["backtest_id"],
          "native_metrics": r["native_metrics"]} for r in ranked]
     save()
-    return 0 if bundle["status"] == "COLLECTED" else 1
+    return 0 if bundle["status"] == "COLLECTED_WITH_NATIVE_FEE_FLOOR" else 1
 
 
 if __name__ == "__main__":
