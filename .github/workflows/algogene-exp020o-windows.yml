@@ -1,0 +1,46 @@
+name: ALGOGENE EXP020O identical-strategy 2023-2025 and 2021-2025
+on:
+  push:
+    branches: [research/four-asset-basis-2023-2025]
+    paths: [configs/exp020o_windows.json]
+permissions:
+  contents: write
+concurrency:
+  group: algogene-cloud-backtest
+  cancel-in-progress: false
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile and independently test code before API requests
+        run: |
+          python -m compileall -q src scripts tests
+          python -m unittest discover -s tests -v
+      - name: Run identical EXP020 source over two full independent date scopes with absent TradeCost
+        env:
+          ALGOGENE_USER_ID: ${{ secrets.ALGOGENE_USER_ID }}
+          ALGOGENE_API_KEY: ${{ secrets.ALGOGENE_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python -u scripts/algogene_exp020o_windows_run.py
+      - name: Upload platform and shadow-fee evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exp020o-windows-percent-fees-${{ github.run_id }}-${{ github.run_attempt }}
+          path: outputs/exp020o_windows/platform-responses.json
+          retention-days: 90
+      - name: Archive native fee evidence, reject nonzero native costs
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          if test -f outputs/exp020o_windows/platform-responses.json; then
+            python scripts/archive_exp020o_windows.py
+          fi
