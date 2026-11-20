@@ -191,6 +191,13 @@ class AlgoEvent:
         self.halted = False
         self.spec = {}
         self.cached = {"BTC": None, "ETH": None}
+        # Virtual cash charge: platform TradeCost=0, real fee is shadow ledger.
+        self.fee_total = 0.0
+        self.fee_events = 0
+        self.fee_by_year = {}
+        self.fill_entries = {}
+        self.realized_gross = 0.0
+        self.cost_final_logged = False
         self.states = {
             p: {"phase": "FLAT", "legs": {}, "pending": set(), "pending_at": None,
                 "side": 0, "opened": None, "entry_basis": None,
@@ -213,7 +220,7 @@ class AlgoEvent:
         self.evt.start()
 
     def _log(self, *args):
-        self.evt.consoleLog("EXP018", *args)
+        self.evt.consoleLog("EXP020", *args)
 
     def _halt(self, reason):
         self.halted = True
@@ -247,16 +254,15 @@ class AlgoEvent:
             raise ValueError("H24_INSUFFICIENT_OR_GAPPED")
         if sig["end"] != recent:
             raise ValueError("H4_LAST_BAR_STALE")
-        # At this moment both legs must agree with the last completed H1
-        # close within a plausible one-hour basis change.
-        quote_gap = abs(math.log(
-            (f_hours[recent]["c"] / s_hours[recent]["c"]) /
-            (f4[sig["end"]]["c"] / s4[sig["end"]]["c"])))
-        if quote_gap > 0.001:
-            raise ValueError("H1_H4_COHERENCE")
+        # EXP018 H1-vs-resampled-H4 close comparison was tautological.
+        # Evaluate 4 independent basis changes using 5 complete paired H1 bars.
+        basis_risk = _recent_basis_risk(s_hours, f_hours, recent)
+        if basis_risk is None:
+            raise ValueError("RECENT_H1_PAIR_GAP")
         return {"signal": sig, "regime": regime,
                 "spot_close": s_hours[recent]["c"],
-                "future_close": f_hours[recent]["c"]}
+                "future_close": f_hours[recent]["c"],
+                "basis_risk": basis_risk}
 
     def _equity(self, ab):
         nav = _num(_get(ab, "NAV")) or _num(_get(ab, "nav")) or _num(_get(ab, "equity"))
@@ -265,6 +271,36 @@ class AlgoEvent:
             # Fallback only for sizing, not for inference about max drawdown.
             nav = free
         return nav, free
+
+    def _book_fill(self, of, symbol, pair):
+        """Record real confirmed fill and corresponding percent cash fee."""
+        price = _num(_get(of, "fill_price"))
+        qty = _num(_get(of, "fill_volume"))
+        if price is None or qty is None:
+            self._halt("MISSING_ACTUAL_FILL_PRICE_OR_VOLUME_" + symbol)
+            return False
+        fee = _percent_fee(price, qty, self.spec.get(symbol))
+        self.fee_total += fee
+        self.fee_events += 1
+        stamp = self.pair_last_hour[pair] or self.last_hour
+        year = str(stamp.year) if stamp is not None else "unknown"
+        self.fee_by_year[year] = self.fee_by_year.get(year, 0.0) + fee
+        action = _get(of, "openclose")
+        trade = _get(of, "tradeID")
+        if action == "open":
+            side = self.states[pair]["side"]
+            sign = -side if symbol == PAIRS[pair][0] else side
+            self.fill_entries[trade] = (symbol, sign, price, qty)
+        elif action == "close":
+            previous = self.fill_entries.get(trade)
+            if (previous is None or previous[0] != symbol or
+                    abs(previous[3] - qty) > 0.000001):
+                self._halt("FILL_PAIR_MISMATCH_" + symbol)
+                return False
+            self.realized_gross += (previous[1] * qty * (price - previous[2]) *
+                                    self.spec[symbol])
+            del self.fill_entries[trade]
+        return True
 
     def _open(self, pair, quantity_s, quantity_f, side, now, basis):
         state = self.states[pair]
@@ -283,7 +319,7 @@ class AlgoEvent:
                 self.evt.sendOrder(AlgoAPIUtil.OrderObject(
                     instrument=symbol, openclose="open", buysell=sign,
                     volume=qty, ordertype=0,
-                    orderRef="EXP018-%s-%s-%s" % (
+                    orderRef="EXP020-%s-%s-%s" % (
                         pair, state["serial"], symbol)))
             except Exception:
                 self._halt("OPEN_ORDER_EXCEPTION_" + symbol)
@@ -341,6 +377,9 @@ class AlgoEvent:
             return
         action = _get(of, "openclose")
         if state["phase"] == "OPENING" and action == "open" and symbol in state["pending"]:
+            if not self._book_fill(of, symbol, pair):
+                self._rescue(pair)
+                return
             trade = _get(of, "tradeID")
             if trade is None:
                 self._halt("OPEN_TRADE_ID_MISSING_" + pair)
@@ -352,6 +391,9 @@ class AlgoEvent:
                 state["phase"] = "OPEN"
                 self._log("PAIR_CONFIRMED", pair)
         elif state["phase"] == "CLOSING" and action == "close" and symbol in state["pending"]:
+            if not self._book_fill(of, symbol, pair):
+                self._rescue(pair)
+                return
             del state["legs"][symbol]
             state["pending"] = {x for x in state["pending"] if x != symbol}
             if not state["pending"]:
