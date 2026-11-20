@@ -14,6 +14,7 @@ import sys
 import time
 import urllib.parse
 import urllib.request
+import urllib.error
 from datetime import datetime, timezone
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -225,6 +226,17 @@ def main():
         save()
         print("BAS-002A pilot collected; inspect artifacts for price modes and results")
         return 0
+    except urllib.error.HTTPError as exc:
+        report["status"]="API_HTTP_ERROR"
+        report["http_status"]=exc.code
+        report["retry_after_present"]=bool(exc.headers.get("Retry-After"))
+        report["error_type"]="HTTPError"
+        report["reason_category"]=("RATE_LIMIT" if exc.code in (429, 403) else
+                                   "BAD_REQUEST_OR_DATE_RANGE" if exc.code == 400 else
+                                   "HTTP_ERROR")
+        save()
+        print("BAS-002A API HTTP",exc.code,report["reason_category"])
+        return 1
     except Exception as exc:
         report["status"]="ERROR"
         report["error_type"]=type(exc).__name__
