@@ -1,0 +1,5 @@
+symbol,year,annual_rate_pct,source
+BTCUSDT,2024,10,synthetic_test_only
+BTCUSDT,2025,-5,synthetic_test_only
+ETHUSDT,2024,2,synthetic_test_only
+ETHUSDT,2025,4,synthetic_test_only

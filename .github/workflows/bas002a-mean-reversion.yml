@@ -1,0 +1,43 @@
+name: BAS-002A Basis Mean Reversion Pilot (Read Only)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/bas002a-mean-reversion.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bas002a-mean-reversion-history
+  cancel-in-progress: false
+
+jobs:
+  study:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Static checks and synthetic model tests
+        run: |
+          python -m compileall -q tools tests strategy
+          python -m unittest discover -s tests -v
+      - name: BAS-002A collect ALGOGENE historical market data only
+        env:
+          ALGOGENE_USER_ID: ${{ secrets.ALGOGENE_USER_ID }}
+          ALGOGENE_API_KEY: ${{ secrets.ALGOGENE_API_KEY }}
+        run: python -u tools/bas002a_mean_reversion.py
+      - name: Preserve evidence even if collection failed
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bas002a-pilot-${{ github.run_id }}-${{ github.run_attempt }}
+          path: outputs/bas002a/
+          if-no-files-found: warn
+          retention-days: 90

@@ -1,58 +1,19 @@
-# ALGOGENE Crypto strategy project
+# ALGOGENE BTC/ETH 现货—永续合约基差均值回归策略
 
-Active research design: **2021–2023 Development, 2024 Validation, 2025 Final Test**. V1.0–V1.4 are iterative strategy versions. See the controlling [research protocol](docs/research_protocol.md) and [machine-readable windows](configs/research_windows.json). V1.0 is being rerun on January 2021 with effective-date verification.
+## 新研究主线
+原有 EXP-001 至 EXP-016 等旧项目内容已备份至分支 [archive/pre-basis-research-2026-11-20](../../tree/archive/pre-basis-research-2026-11-20)。此主分支已重新整理为基差均值回归研究。
 
-Active V1.1 setting: **60-minute BTCUSD candles and hourly decisions**, EMA200, Donchian20 entry / Donchian10 or EMA exit, fixed 0.01 lot, long-only. See [EXP-006](experiments/EXP-006-v1.1-hourly.md).
+- **V8.1 基准策略**：[strategy/crypto_basis_v8_1.py](strategy/crypto_basis_v8_1.py)，买入现货/卖空等币数量永续合约。基差收敛并不保证套利盈利。
+- **首项统计实验 BAS-002A**：[实验协议](experiments/BAS-002A_基差均值回归验证.md)，检验高Z-score正基差出现后24/48/72小时的实际变化。
+- **研究总路线**：[完整实验研究方案](experiments/00_完整实验研究方案.md)，覆盖成本、参数、资金杠杆、压力测试和冻结后检验。
+- **策略数学与机制**：[策略原理与参数](docs/策略原理与参数.md)；[Funding口径](docs/BAS-001_年度平均Funding方案.md)。
 
-V1.2 is registered in [EXP-007](experiments/EXP-007-v1.2-hourly.md): identical hourly signals and platform settings, ATR14-based opening quantity. Its Actions workflow automatically submits, waits, collects original platform responses and commits the evidence bundle. Platform-returned statistics are authoritative; no local P/L or return reconstruction for new runs.
+## 开始测试
+[GitHub Actions：BAS-002A Pilot](../../actions/workflows/bas002a-mean-reversion.yml) 由对应工作流文件首次推送触发，也支持手动运行。只调用ALGOGENE的 `history_price` GET读取历史数据，不会发送订单、开实盘或提交云端回测。需要GitHub Actions secrets：`ALGOGENE_USER_ID`、`ALGOGENE_API_KEY`。
 
-V1.3 is registered in [EXP-008](experiments/EXP-008-v1.3-hourly.md): keep V1.2 signals and ATR sizing; attach the platform-native stopLossLevel at ask minus 2×ATR14. The same automatic collection/archive process saves original platform outputs, without local metric recalculation.
+2024-12-31是第一轮采样锚点，每个品种请求720条小时数据，严格按UTC时间戳对齐；用先前168条基差记录计算z-score，观察未来24、48、72小时基差变化。若只有close没有Bid/Ask，统计值被标为**非可执行的close代理**，不得误写成收益。第一轮不是2021–2024全历史验证。
 
-V1.2 and V1.3 now have automatically archived native results: [V1.2 evidence](experiments/EXP-007/runs/43883914291-attempt-1.json) and [V1.3 evidence](experiments/EXP-008/runs/43890469995-attempt-1.json). Both effective native TradeCost values are 0.0. [EXP-009](experiments/EXP-009-native-fees-robustness.md) registers a native fee API probe, independent annual runs, isolated stop sensitivity, and a 24-hour EMA slope filter. Its Actions workflow saves submission IDs and each row before continuing. New results remain NOT RUN until actual platform evidence arrives; 2024/2025 stay unused.
-
-Current status: **V1.1–V1.3 hourly Development backtests completed for 2021–2023**. V1.3 native TotalPnL is **51.5489 USD**, AnnualSharpe **0.1538017462**, maxDrawdown_pct **0.0163334286**, TradeCnt **326**, effective TradeCost **0.0**; these are platform fields, not recalculated metrics. V1.0 functional evidence remains in [EXP-004](experiments/EXP-004-v1.0-development.md). EXP-009's eight native experiments are now collected; [review and next-step proposal](experiments/EXP-009-review.md). Independent annual baseline results vary, and native fixed-cost 1.0 makes the baseline negative. EMA filtering is an unvalidated candidate: its cost test is NOT RUN. Validation and Final Test remain unused.
-
-The controlling deliverable is the user's current ALGOGENE official scoring template. Older repository plans, dates, candidate-team divisions, and research-stage assignments are retained as historical context only; they do not constrain current execution.
-
-Current review: [15 historical strategy records](experiments/history-through-EXP-011.md), including all four EXP-011 combinations, which were collected and all lost money. A higher native Score_Total did not guarantee better P/L; all failures remain archived. [EXP-012](experiments/EXP-012-history-research.md) now registers a native .001-quantity probe, optional fine-size EMA control, two native TP/hold-time variants and two flat-regime range variants. It addresses actual SKIP_SIZE logs without raising risk caps. All new results are NOT RUN until native evidence arrives. Same hourly data and fixed fee 1.0; 2024/2025 stay unused.
-
-## V1.0
-
-V1.0 is a minimal compatibility experiment for BTCUSD:
-
-- read three hourly historical bars with `getHistoricalBar`;
-- submit one guarded `0.01` BTC market buy in an ALGOGENE cloud backtest;
-- attach a 2% stop loss;
-- close once on the next market event using the returned `tradeID`;
-- refuse duplicates, missing data, invalid prices, and wrong subscriptions.
-
-Start here:
-
-- [Executable ALGOGENE script](src/algogene_crypto_v1_0.py)
-- [Runbook, API evidence, and risk controls](docs/v1_0_runbook.md)
-- [Reference backtest settings](configs/v1_0_smoke_test.json)
-- [EXP-001 result record](experiments/EXP-001-v1.0-smoke.md)
-- [Official-template report workspace](report/README.md)
-
-## Truth and security rules
-
-- `PASS` means direct evidence exists. Platform work that has not run is recorded as `NOT RUN`, never as an assumed success.
-- Never invent a Backtest ID, trade, fill, P/L, Sharpe ratio, drawdown, or account permission.
-- Never commit API keys, user IDs, account IDs, private exports, or unredacted platform logs.
-- GitHub CI tests the script with a fake documented API surface. That is not an ALGOGENE backtest.
-- A separate manual workflow can perform a read-only BTCUSD history call using GitHub Secrets; it cannot place trades or submit a cloud backtest.
-
-## Official scoring-template order
-
-The working report follows the supplied template rather than the repository's previous planning structure:
-
-1. ALGOGENE System Info — User ID and Backtest ID remain private/blank until a real run exists.
-2. Strategy Script.
-3. Executive Summary (15 points).
-4. Implementation Details (20 points).
-5. Risk Management (20 points).
-6. Capital Management (15 points).
-7. Backtest Performance.
-8. Real Trading / implementation considerations.
-
-Existing material under `docs/` and `candidates/` may be reused only when it is consistent with actual V1.x evidence and the official template.
+## 研究要求
+- 不在代码或平台配置里硬编码固定 `TradeCost` 代替百分比成本；完整交易费/滑点/Funding在独立实验处理。
+- 所有实际结果必须有 GitHub Actions run、真实数据范围和原始文件支持；未验证则标记NOT RUN或UNKNOWN。
+- 2025年已经可能被以往研究利用，不能自动宣称严格独立样本外。
