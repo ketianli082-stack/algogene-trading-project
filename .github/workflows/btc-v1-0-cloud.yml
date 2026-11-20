@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/btc-v1-0-cloud.yml'
+      - 'tools/btc_v1_0_cloud_run.py'
   workflow_dispatch:
 permissions:
   contents: read
