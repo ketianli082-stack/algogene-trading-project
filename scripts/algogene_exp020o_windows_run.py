@@ -153,7 +153,9 @@ def main():
                      "attempt": attempt + 1})
                 save()
                 # No response body is retained: it might expose credentials.
-                retryable = status_code in (408, 429, 500, 502, 503, 504)
+                # Safe bounded retry for the read-only task-status preflight only.
+                # A POST submission is NEVER retried after any response or timeout.
+                retryable = status_code in (408, 429, 500, 502, 503, 504) or (label == "tasks" and status_code == 400)
                 if post or not retryable or attempt != 0:
                     raise
                 print("GET_RETRY", label, status_code, flush=True)
@@ -172,6 +174,11 @@ def main():
         return 1
     try:
         plan = build_plan()
+        only_window = os.getenv("EXP020O_ONLY_WINDOW", "").strip()
+        if only_window:
+            plan = [row for row in plan if row["name"] == only_window]
+            if len(plan) != 1:
+                raise ValueError("Unknown or ambiguous EXP020O_ONLY_WINDOW")
     except Exception as exc:
         bundle.update(status="ERROR", reason="Plan validation: " + type(exc).__name__)
         save()
