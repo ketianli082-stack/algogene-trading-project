@@ -1,4 +1,5 @@
 name: BAS-002A Basis Mean Reversion Pilot (Read Only)
+# Revision 2: sanitized HTTP status diagnostics on historical API requests.
 
 on:
   push:
