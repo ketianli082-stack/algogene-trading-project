@@ -68,16 +68,25 @@ def quote_price(item):
 
 
 
-def valid_ohlc(item):
-    if not isinstance(item, dict):
-        return None
-    h = positive(item.get("h", item.get("highPrice")))
-    l = positive(item.get("l", item.get("lowPrice")))
-    c = positive(item.get("c", item.get("closePrice")))
-    if h is None or l is None or c is None or l > h or not l <= c <= h:
-        return None
-    return h, l, c
-
+def history_ohlc(history, before):
+    """Return sorted, completed hourly OHLC from ALGOGENE getHistoricalBar."""
+    if not isinstance(history, dict):
+        return []
+    observations = {}
+    for k, data in history.items():
+        if not isinstance(data, dict):
+            continue
+        try:
+            t = timestamp(data.get("t", k))
+        except (TypeError, ValueError, OverflowError):
+            continue
+        if t >= before:
+            continue
+        h, l, c = positive(data.get("h")), positive(data.get("l")), positive(data.get("c"))
+        if h is None or l is None or c is None or not l <= c <= h:
+            continue
+        observations[t] = (h, l, c)
+    return sorted(observations.items())
 
 def adx_series(bars, period=14):
     """Wilder ADX14 from historical high/low/close, no external libraries."""
@@ -120,7 +129,8 @@ def v11_signal(prices, bars, threshold=ADX_THRESHOLD):
 class AlgoEvent:
     def __init__(self):
         self.prices = deque(maxlen=WINDOW)
-        self.bars = deque(maxlen=WINDOW)
+        self.adx_queries = 0
+        self.adx_errors = 0
         self.last_time = None
         self.contract_size = None
         self.lots = {}
@@ -131,7 +141,7 @@ class AlgoEvent:
         self.evt = AlgoAPI_Backtest.AlgoEvtHandler(self, mEvt)
         subscriptions = mEvt.get("subscribeList", [])
         if SYMBOL not in subscriptions or len(subscriptions) != 1:
-            raise ValueError("V1.0 requires exactly BTCUSD as subscribed instrument")
+            raise ValueError("V1.1 requires exactly BTCUSD as subscribed instrument")
         spec = self.evt.getContractSpec(SYMBOL)
         self.contract_size = positive(spec.get("contractSize"))
         if self.contract_size is None:
@@ -155,18 +165,30 @@ class AlgoEvent:
         if price is None:
             return
 
-        # Only prior completed observations determine the signal.
-        bar = valid_ohlc(item)
-        if bar is None:
-            self.last_time = now
-            self.prices.clear()
-            self.bars.clear()
-            self.evt.consoleLog('MISSING_OHLC', now)
-            return
-        signal = v11_signal(list(self.prices), list(self.bars))
+        # Preserve the working V1.0 hourly EMA state even if OHLC is absent.
+        # Evaluate using prices strictly before the current timestamp.
+        signal = cross_signal(list(self.prices))
         self.last_time = now
         self.prices.append(price)
-        self.bars.append(bar)
+        if signal == 1 and not self.lots and self.pending is None and not self.halted:
+            self.adx_queries += 1
+            try:
+                history = self.evt.getHistoricalBar(
+                    {"instrument": SYMBOL}, 160, "H", now)
+                completed = history_ohlc(history, now)
+                adx = adx_series([bar for _, bar in completed], ADX_PERIOD)
+                if not adx:
+                    self.evt.consoleLog("ADX_NOT_READY", now, len(completed))
+                    signal = 0
+                else:
+                    self.evt.consoleLog("ADX_ENTRY_CHECK", now, round(adx[-1], 3),
+                                        ADX_THRESHOLD, len(completed))
+                    if adx[-1] <= ADX_THRESHOLD:
+                        signal = 0
+            except Exception as exc:
+                self.adx_errors += 1
+                self.evt.consoleLog("ADX_HISTORY_ERROR", now, type(exc).__name__)
+                signal = 0
 
         if self.pending is not None or self.halted:
             return
