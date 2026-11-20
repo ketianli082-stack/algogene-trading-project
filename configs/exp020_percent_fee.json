@@ -108,5 +108,6 @@
     "No bid-ask, slippage, funding/borrow costs; mark as optimistic."
   ],
   "start_reason": "User authorized optimized next version with 0.05% proportional fee in strategy code",
-  "trigger": "2026-11-20-exp020-initial-2025-percent-fee-optimized-v1"
+  "trigger": "2026-11-20-exp020-corrected-ci-first-native-submit-v2",
+  "relaunch_reason": "The first EXP020 workflow 44672793182 failed in CI before all API calls because a test rejected a historical EXP018 name in a comment. Commit 5290b456 corrected test only, and CI 44672847375 completed successfully. No prior native run was submitted."
 }
