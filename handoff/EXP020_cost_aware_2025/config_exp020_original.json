@@ -1,0 +1,113 @@
+{
+  "experiment": "EXP-020",
+  "version": "EXP018-to-EXP020: proportional commission and tail-risk pre-trade screen",
+  "objective": "Maximize validated risk-adjusted native score subject to actual 0.05% fill fee adjusted profitability",
+  "fee_specification": {
+    "rate_per_fill": 0.0005,
+    "percentage_per_fill": "0.05%",
+    "basis": "actual fill_price * fill_volume * contractSize",
+    "applies_to": "both spot/futures, BOTH open and close fill callbacks",
+    "native_TradeCost": 0,
+    "model_fee_ledger": "COST_FINAL cumulative by year in strategy logs; native Score_Total is before shadow fees",
+    "note": "Fee is not debited from native ALGOGENE account. Strategy sizing uses shadow-adjusted NAV; report adjusted net PnL separately."
+  },
+  "reference": {
+    "exp018_2025_native_score": 63.74015457282406,
+    "exp018_2025_native_pnl": 5812.902733939933,
+    "exp018_2023_25_score": 73.21526135948776
+  },
+  "settings": {
+    "strategyName": "EXP020 5bps risk filtered 2025",
+    "subscribeList": [
+      "BTCUSD",
+      "BTCUSDM",
+      "ETHUSD",
+      "ETHUSDM"
+    ],
+    "StartDate": "2025-01",
+    "EndDate": "2025-12",
+    "InitialCapital": 1000000,
+    "BaseCurrency": "USD",
+    "risk_free": 0,
+    "Leverage": 1,
+    "allowShortSell": true,
+    "dataset": 60,
+    "isPositionBaseEnv": false,
+    "isNewsFeedOn": false,
+    "isEconstatFeedon": false,
+    "isWeatherFeedOn": false,
+    "TradeCost": 0
+  },
+  "baseline_params": {
+    "lookback_h4": 42,
+    "entry_z": 2,
+    "exit_z": 0.4,
+    "stop_basis": 0.0075,
+    "max_hold_hours": 36,
+    "max_abs_basis": 0.025,
+    "max_h1_divergence": 0.006,
+    "max_daily_move": 0.06,
+    "min_edge": 0.002,
+    "gross_pair": 0.1,
+    "min_pair_notional": 1000,
+    "min_half_life": 0.75,
+    "max_half_life": 24,
+    "use_ou_gate": false,
+    "cooldown_hours": 18,
+    "stop_cooldown_hours": 48,
+    "max_h1_leg_move": 0.03,
+    "fee_rate": 0.0005,
+    "min_net_expected_profit_usd": 50,
+    "max_recent_h1_basis_jump": 0.006,
+    "max_recent_4h_basis_range": 0.012
+  },
+  "candidates": [
+    {
+      "name": "cost-aware-2025",
+      "start": "2025-01",
+      "end": "2025-12",
+      "params": {
+        "lookback_h4": 42,
+        "entry_z": 2,
+        "exit_z": 0.4,
+        "stop_basis": 0.0075,
+        "max_hold_hours": 36,
+        "max_abs_basis": 0.025,
+        "max_h1_divergence": 0.006,
+        "max_daily_move": 0.06,
+        "min_edge": 0.002,
+        "gross_pair": 0.1,
+        "min_pair_notional": 1000,
+        "min_half_life": 0.75,
+        "max_half_life": 24,
+        "use_ou_gate": false,
+        "cooldown_hours": 18,
+        "stop_cooldown_hours": 48,
+        "max_h1_leg_move": 0.03,
+        "fee_rate": 0.0005,
+        "min_net_expected_profit_usd": 50,
+        "max_recent_h1_basis_jump": 0.006,
+        "max_recent_4h_basis_range": 0.012
+      }
+    }
+  ],
+  "source": "src/four_asset_h1_exp020.py",
+  "changes": [
+    "5bps charge at actual fills on all four opening and closing events",
+    "Take fee totals out of strategy risk/sizing NAV and display shadow net PnL, native TradeCost is 0",
+    "Entry economic opportunity must exceed predicted full round-trip fees plus $50",
+    "Require favorable current quote instead of only H4 historical signal",
+    "Reject high max recent H1 basis jump and four hour basis range",
+    "Reduce current quote 1h divergence veto from 1.0% to 0.6% and single-leg jump veto from 4% to 3%",
+    "Remove tautological H1-vs-H4 coherence test and verify actual contiguous recent paired H1 basis values",
+    "Timezone-aware historical timestamps normalized to UTC"
+  ],
+  "limitations": [
+    "Not a true out-of-sample test; 2025 used in EXP018 strategy choice.",
+    "Native ALGOGENE score excludes internal shadow commissions; use internal adjusted net for economic conclusions.",
+    "No bid-ask, slippage, funding/borrow costs; mark as optimistic."
+  ],
+  "start_reason": "User authorized optimized next version with 0.05% proportional fee in strategy code",
+  "trigger": "2026-11-20-exp020-corrected-ci-first-native-submit-v2",
+  "relaunch_reason": "The first EXP020 workflow 44672793182 failed in CI before all API calls because a test rejected a historical EXP018 name in a comment. Commit 5290b456 corrected test only, and CI 44672847375 completed successfully. No prior native run was submitted."
+}
