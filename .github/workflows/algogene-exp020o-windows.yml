@@ -23,8 +23,9 @@ jobs:
         run: |
           python -m compileall -q src scripts tests
           python -m unittest discover -s tests -v
-      - name: Run identical EXP020 source over two full independent date scopes with absent TradeCost
+      - name: Retry ONLY EXP020O 2021-2025 with frozen source and omitted TradeCost
         env:
+          EXP020O_ONLY_WINDOW: omit-tradecost-2021-2025
           ALGOGENE_USER_ID: ${{ secrets.ALGOGENE_USER_ID }}
           ALGOGENE_API_KEY: ${{ secrets.ALGOGENE_API_KEY }}
           GITHUB_TOKEN: ${{ github.token }}
