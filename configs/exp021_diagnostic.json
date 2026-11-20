@@ -82,5 +82,6 @@
     "final_log": "DIAG_FINAL",
     "trade_logic_changed": false
   },
-  "run_trigger": "2026-11-20-exp021-annual-funnel-diagnostic-once"
+  "run_trigger": "2026-11-20-exp021-diagnostic-retry-after-plan-hash-fix",
+  "notes": "First diagnostic Actions run 44704383475 stopped at local unit test; no ALGOGENE POST was attempted. This commit launches the first platform diagnostic submission."
 }
