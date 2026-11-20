@@ -1,0 +1,31 @@
+name: BTC V1.0 EMA 60min - Static Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/btc-v1-0.yml'
+      - 'strategy/btc_v1_0_ema60.py'
+      - 'tests/test_btc_v1_0.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  btc-v1-static-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Python syntax
+        run: python -m py_compile strategy/btc_v1_0_ema60.py tests/test_btc_v1_0.py
+      - name: EMA logic and data guard tests (offline, no ALGOGENE)
+        run: python -m unittest discover -s tests -p 'test_btc_v1_0.py' -v
+      - name: Confirm held-out evaluation is NOT invoked
+        run: |
+          echo "Static test only; no orders and no ALGOGENE historical backtest."
+          echo "Training: 2021-2024; held-out 2025 remains untouched."
