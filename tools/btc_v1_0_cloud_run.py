@@ -139,7 +139,7 @@ def main():
         if not all(isinstance(v, str) and v and all(c in "0123456789_" for c in v)
                    for v in (runtime_id, task_id)):
             evidence.update(status="AMBIGUOUS", reason="Submission succeeded but task IDs need review",
-                            "response": redact(result, secrets))
+                            response=redact(result, secrets))
             save()
             return 1
         evidence.update(status="SUBMITTED", backtest_id=runtime_id, task_id=task_id)
