@@ -32,7 +32,7 @@ class IndependentWindows(unittest.TestCase):
         s=(ROOT/"scripts/algogene_exp020o_windows_run.py").read_text()
         self.assertIn('checks["TradeCost"] = math.isclose(float(actual_trade_cost), 0.0',s)
         self.assertIn('INVALID_NATIVE_FEE_OR_VALIDATION',s)
-        self.assertIn('len(plan) == 2',s)
+        self.assertIn('all(r["status"] == "COLLECTED" for r in plan)',s)
         self.assertIn('if post or not retryable or attempt != 0:',s)
         self.assertIn('assert "TradeCost" not in row["settings"]',s)
         self.assertNotIn("native_fee_override",s)
