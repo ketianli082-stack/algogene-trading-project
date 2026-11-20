@@ -249,7 +249,7 @@ def main():
             # hour. Native score is pre-proportional-fee and must be labelled.
             raw_logs = str(row["platform"]["logs"][-1].get("res", ""))
             matches = re.findall(
-                r"EXP020, COST_FINAL, ([0-9.]+), ([-0-9.]+), ([-0-9.]+), ([0-9]+), (\\{[^\\n]*\\})",
+                r"EXP020, COST_FINAL, ([0-9.]+), ([-0-9.]+), ([-0-9.]+), ([0-9]+), (\{[^\n]*\})",
                 raw_logs)
             if matches:
                 paid, gross, shadow_net, events, annual = matches[-1]
