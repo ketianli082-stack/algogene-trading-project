@@ -1,0 +1,96 @@
+{
+  "experiment": "EXP-020Z",
+  "purpose": "Strict test of native ALGOGENE effective TradeCost==0.0; no native fixed fee offset or reimbursement is allowed.",
+  "input_encoding": "send TradeCost as non-empty JSON string '0.0' rather than numeric 0. The native backtest is valid ONLY when platform response effective TradeCost numerically equals 0.0.",
+  "settings": {
+    "strategyName": "EXP020Z strict zero native fee test 2025",
+    "subscribeList": [
+      "BTCUSD",
+      "BTCUSDM",
+      "ETHUSD",
+      "ETHUSDM"
+    ],
+    "StartDate": "2025-01",
+    "EndDate": "2025-12",
+    "InitialCapital": 1000000,
+    "BaseCurrency": "USD",
+    "risk_free": 0,
+    "Leverage": 1,
+    "allowShortSell": true,
+    "dataset": 60,
+    "isPositionBaseEnv": false,
+    "isNewsFeedOn": false,
+    "isEconstatFeedon": false,
+    "isWeatherFeedOn": false,
+    "TradeCost": "0.0"
+  },
+  "exp020_source_sha256": "4c2ff67079b9a2feb3d96df7d6ca05c5c30e67fb4ea914deed5b55036a330b6a",
+  "baseline_params": {
+    "lookback_h4": 42,
+    "entry_z": 2,
+    "exit_z": 0.4,
+    "stop_basis": 0.0075,
+    "max_hold_hours": 36,
+    "max_abs_basis": 0.025,
+    "max_h1_divergence": 0.006,
+    "max_daily_move": 0.06,
+    "min_edge": 0.002,
+    "gross_pair": 0.1,
+    "min_pair_notional": 1000,
+    "min_half_life": 0.75,
+    "max_half_life": 24,
+    "use_ou_gate": false,
+    "cooldown_hours": 18,
+    "stop_cooldown_hours": 48,
+    "max_h1_leg_move": 0.03,
+    "fee_rate": 0.0005,
+    "min_net_expected_profit_usd": 50,
+    "max_recent_h1_basis_jump": 0.006,
+    "max_recent_4h_basis_range": 0.012
+  },
+  "candidates": [
+    {
+      "name": "native-zero-string-2025",
+      "start": "2025-01",
+      "end": "2025-12",
+      "params": {
+        "lookback_h4": 42,
+        "entry_z": 2,
+        "exit_z": 0.4,
+        "stop_basis": 0.0075,
+        "max_hold_hours": 36,
+        "max_abs_basis": 0.025,
+        "max_h1_divergence": 0.006,
+        "max_daily_move": 0.06,
+        "min_edge": 0.002,
+        "gross_pair": 0.1,
+        "min_pair_notional": 1000,
+        "min_half_life": 0.75,
+        "max_half_life": 24,
+        "use_ou_gate": false,
+        "cooldown_hours": 18,
+        "stop_cooldown_hours": 48,
+        "max_h1_leg_move": 0.03,
+        "fee_rate": 0.0005,
+        "min_net_expected_profit_usd": 50,
+        "max_recent_h1_basis_jump": 0.006,
+        "max_recent_4h_basis_range": 0.012
+      }
+    }
+  ],
+  "fees": {
+    "native_required": "0.0",
+    "economic_fill_rate": 0.0005,
+    "percent": "0.05% per actual fill notional on both opens and closes",
+    "forbidden": "do not restore, refund, or offset native fee; reject run if platform imposes a fee",
+    "nonnativeScore": "Native Score_Total does not include shadow ledger 0.05% fee."
+  },
+  "previous_zero_attempt": {
+    "run_id": 44672882148,
+    "backtest_id": "20261120_042009_619119",
+    "request": 0,
+    "effective": 1,
+    "invalid_reason": "TradeCost was overridden by ALGOGENE native engine."
+  },
+  "launch_id": "exp020z-probe-string-0.0-one-run-2026-11-20"
+}
