@@ -1,0 +1,18 @@
+{
+  "strategyName": "BTC V1.0 EMA20-50 60min TRAIN 2021-2024",
+  "subscribeList": [
+    "BTCUSD"
+  ],
+  "StartDate": "2021-01",
+  "EndDate": "2024-12",
+  "InitialCapital": 10000,
+  "BaseCurrency": "USD",
+  "risk_free": 0,
+  "Leverage": 1,
+  "allowShortSell": false,
+  "dataset": 60,
+  "isPositionBaseEnv": false,
+  "isNewsFeedOn": false,
+  "isEconstatFeedon": false,
+  "isWeatherFeedOn": false
+}
