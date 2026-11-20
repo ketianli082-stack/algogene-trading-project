@@ -23,7 +23,7 @@ ENDPOINT = "https://algogene.com/rest/v1/history_price"
 SYMBOLS = ("BTCUSD", "BTCUSDM", "ETHUSD", "ETHUSDM")
 PAIRS = (("BTC", "BTCUSD", "BTCUSDM"), ("ETH", "ETHUSD", "ETHUSDM"))
 ANCHORS = ("2024-12-31",)
-COUNT = 720
+COUNT = 240
 WINDOW = 168
 HORIZONS = (24, 48, 72)
 Z_THRESHOLD = 2.0
@@ -70,13 +70,13 @@ def normalize(payload):
         if not isinstance(row, dict):
             continue
         observed_fields.update(row)
-        tval = next((row[k] for k in ("timestamp", "time", "date", "datetime")
+        tval = next((row[k] for k in ("timestamp", "time", "date", "datetime", "t")
                      if k in row), None)
         try:
             t = timestamp(tval)
         except (ValueError, TypeError, OverflowError):
             continue
-        bid, ask = numeric(row.get("bidPrice")), numeric(row.get("askPrice"))
+        bid, ask = numeric(row.get("bidPrice", row.get("b"))), numeric(row.get("askPrice", row.get("a")))
         if bid is not None and ask is not None and bid <= ask:
             result[t] = {"value": (bid + ask)/2, "mode": "bidask_mid"}
             continue
@@ -231,6 +231,13 @@ def main():
         report["http_status"]=exc.code
         report["retry_after_present"]=bool(exc.headers.get("Retry-After"))
         report["error_type"]="HTTPError"
+        safe_text = exc.read(1200).decode("utf-8", errors="replace")
+        # Preserve only non-sensitive diagnostic classification, never raw response.
+        lowered=safe_text.lower()
+        report["api_error_hint"]=("ACCESS_DENIED" if "unauthor" in lowered or "permission" in lowered
+            else "LIMIT_EXCEEDED" if "maximum" in lowered or "limit" in lowered
+            else "PARAMETER_ERROR" if "count" in lowered or "timestamp" in lowered or "interval" in lowered
+            else "UNCLASSIFIED")
         report["reason_category"]=("RATE_LIMIT" if exc.code in (429, 403) else
                                    "BAD_REQUEST_OR_DATE_RANGE" if exc.code == 400 else
                                    "HTTP_ERROR")
