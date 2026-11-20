@@ -8,11 +8,11 @@ H24 ends at UTC 00. Four/six-hour frames are composed from complete H1 bars.
 Pair data validation is independent for BTC and ETH; no stale leg fill-forward.
 """
 import math
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from AlgoAPI import AlgoAPIUtil, AlgoAPI_Backtest
 
 # Exact substitution line for registered EXP-018 cloud candidates.
-PARAMS = {"lookback_h4": 42, "entry_z": 2.0, "exit_z": 0.4, "stop_basis": 0.0075, "max_hold_hours": 36, "max_abs_basis": 0.025, "max_h1_divergence": 0.010, "max_daily_move": 0.06, "min_edge": 0.002, "gross_pair": 0.10, "min_pair_notional": 1000, "min_half_life": 0.75, "max_half_life": 24.0, "use_ou_gate": False, "cooldown_hours": 18, "stop_cooldown_hours": 48, "max_h1_leg_move": 0.04, "min_expected_profit_usd": 75}
+PARAMS = {"lookback_h4": 42, "entry_z": 2.0, "exit_z": 0.4, "stop_basis": 0.0075, "max_hold_hours": 36, "max_abs_basis": 0.025, "max_h1_divergence": 0.006, "max_daily_move": 0.06, "min_edge": 0.002, "gross_pair": 0.10, "min_pair_notional": 1000, "min_half_life": 0.75, "max_half_life": 24.0, "use_ou_gate": False, "cooldown_hours": 18, "stop_cooldown_hours": 48, "max_h1_leg_move": 0.03, "fee_rate": 0.0005, "min_net_expected_profit_usd": 50, "max_recent_h1_basis_jump": 0.006, "max_recent_4h_basis_range": 0.012}
 
 SYMBOLS = ("BTCUSD", "BTCUSDM", "ETHUSD", "ETHUSDM")
 PAIRS = {"BTC": ("BTCUSD", "BTCUSDM"), "ETH": ("ETHUSD", "ETHUSDM")}
@@ -44,7 +44,9 @@ def _time(x):
         if s[-1:] == "Z":
             s = s[:-1] + "+00:00"
         t = datetime.fromisoformat(s)
-        # ALGOGENE backtest timestamps use a consistent timezone.
+        # Normalize explicitly offset timestamps to UTC before matching.
+        if t.tzinfo is not None:
+            t = t.astimezone(timezone.utc)
         return datetime(t.year, t.month, t.day, t.hour, t.minute, t.second)
     except (ValueError, TypeError):
         return None
@@ -161,6 +163,24 @@ def _snapshot(bd, pair):
     if ps is None or pf is None:
         return None
     return {"spot": ps, "future": pf, "basis": math.log(pf / ps)}
+
+
+def _percent_fee(price, qty, contract_size):
+    """Charge fee on actual filled notional for BOTH open and close events."""
+    if None in (_num(price), _num(qty), _num(contract_size)):
+        raise ValueError("FILL_COST_INPUT_MISSING")
+    return float(price) * float(qty) * float(contract_size) * PARAMS["fee_rate"]
+
+
+def _recent_basis_risk(spot_hours, future_hours, recent):
+    """Independent risk check of 5 contiguous completed paired H1 closes."""
+    stamps = [recent - timedelta(hours=i) for i in range(4, -1, -1)]
+    if any(t not in spot_hours or t not in future_hours for t in stamps):
+        return None
+    vals = [math.log(future_hours[t]["c"] / spot_hours[t]["c"]) for t in stamps]
+    return {"max_h1_basis_jump": max(abs(vals[i]-vals[i-1]) for i in range(1, 5)),
+            "h4_basis_range": max(vals)-min(vals)}
+
 
 
 class AlgoEvent:
