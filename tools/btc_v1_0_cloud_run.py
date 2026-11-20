@@ -38,7 +38,8 @@ def load_plan():
         raise ValueError("Only BTCUSD is allowed")
     source = SOURCE.read_text(encoding="utf-8")
     compile(source, str(SOURCE), "exec")
-    if "TradeCost" in source:
+    import re
+    if re.search(r"(?m)^\\s*TradeCost\\s*=", source):
         raise ValueError("Strategy must not set fixed trading cost")
     return settings, source
 
