@@ -2,7 +2,7 @@
 
 Use only BTCUSD on ALGOGENE. Backtest 2021-01-01 through 2024-12-31
 on a 60-minute feed; reserve 2025 as an untouched evaluation period.
-Starting cash USD 10,000, leverage 1, no shorting, trading cost 0.
+Starting cash USD 10,000, leverage 1, and no shorting.
 The 50% allocation is a target exposure, not a guarantee of fills.
 No fixed TradeCost, funding estimate, or manually adjusted PnL.
 
@@ -96,7 +96,7 @@ class AlgoEvent:
         self.contract_size = positive(spec.get("contractSize"))
         if self.contract_size is None:
             raise ValueError("Cannot validate BTCUSD contract size")
-        self.evt.consoleLog("BTC V1.0 EMA20/50 long/flat; 60min; 50% max budget; fee=0")
+        self.evt.consoleLog("BTC V1.0 EMA20/50 long/flat; 60min; 50% max budget")
         self.evt.start()
 
     def on_bulkdatafeed(self, isSync, bd, ab):
