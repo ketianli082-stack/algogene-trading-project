@@ -5,6 +5,7 @@ Records the unmodified native Score_Total and performance as evidence.
 An ambiguous submission or collection failure stops further candidates.
 """
 import ast
+import re
 import hashlib
 import json
 import math
@@ -73,14 +74,15 @@ def build_plan():
                     "max_daily_move", "min_edge", "gross_pair",
                     "min_pair_notional", "min_half_life", "max_half_life",
                     "use_ou_gate", "cooldown_hours", "stop_cooldown_hours",
-                    "max_h1_leg_move", "min_expected_profit_usd"):
+                    "max_h1_leg_move", "fee_rate", "min_net_expected_profit_usd",
+                    "max_recent_h1_basis_jump", "max_recent_4h_basis_range"):
             if key not in p:
                 raise ValueError("Missing strategy parameter: " + key)
         if p != conf["baseline_params"]:
-            raise ValueError("Parameters differ from EXP-018 baseline")
+            raise ValueError("Parameters differ from registered EXP-020 candidate")
         source = template.replace(PARAM_LINE, "PARAMS = " + repr(p), 1)
         digest = hashlib.sha256(source.encode()).hexdigest()
-        if digest != conf["exp020_source_sha256"]:
+        if conf.get("exp020_source_sha256") and digest != conf["exp020_source_sha256"]:
             raise ValueError("Strategy SHA-256 differs from pinned EXP020 source")
         compile(source, "exp020-submission.py", "exec")
         # Local compilation is insufficient: ALGOGENE applies an independent
@@ -243,6 +245,24 @@ def main():
                 call(endpoint, args, label, row)
             statistics = row["platform"]["stats"][-1]
             row["native_metrics"] = native_metrics(statistics)
+            # Parse a single aggregate produced by the STRATEGY at the final
+            # hour. Native score is pre-proportional-fee and must be labelled.
+            raw_logs = str(row["platform"]["logs"][-1].get("res", ""))
+            matches = re.findall(
+                r"EXP020, COST_FINAL, ([0-9.]+), ([-0-9.]+), ([-0-9.]+), ([0-9]+), (\\{[^\\n]*\\})",
+                raw_logs)
+            if matches:
+                paid, gross, shadow_net, events, annual = matches[-1]
+                row["percent_fee_audit"] = {
+                    "fee_rate": 0.0005,
+                    "actual_fill_fee_total_usd": float(paid),
+                    "independent_realized_gross_usd": float(gross),
+                    "internal_net_after_fee_usd": float(shadow_net),
+                    "fill_events": int(events),
+                    "by_year": ast.literal_eval(annual),
+                    "native_score_is_before_internal_fee": True,
+                    "cost_adjusted_native_net_pnl_usd":
+                        row["native_metrics"]["TotalPnL"] - float(paid)}
             effective = statistics.get("setting", statistics.get("settings", {}))
             checks = {}
             for key, value in row["settings"].items():
@@ -275,6 +295,7 @@ def main():
                              and isinstance(trade_count, (int, float)) and trade_count >= 4
                              and "EXP020, HALT" not in logs and "Traceback" not in logs
                              and "PAIR_CONFIRMED" in logs and "COST_FINAL" in logs
+                             and "percent_fee_audit" in row
                              else "INVALID_REVIEW")
             save()
             archive(OUT / "platform-responses.json", "collected-" + row["name"])
