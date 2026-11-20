@@ -1,0 +1,86 @@
+{
+  "experiment": "EXP-021-DIAGNOSTIC",
+  "intent": "Diagnose zero trading in 2021 and 2022 without changing EXP020 trading decisions",
+  "strategy_source": "src/four_asset_h1_exp021_diagnostic.py",
+  "baseline_source": "src/four_asset_h1_exp020.py",
+  "settings": {
+    "strategyName": "EXP021 annual entry funnel 2021-2025",
+    "subscribeList": [
+      "BTCUSD",
+      "BTCUSDM",
+      "ETHUSD",
+      "ETHUSDM"
+    ],
+    "StartDate": "2021-01",
+    "EndDate": "2025-12",
+    "InitialCapital": 1000000,
+    "BaseCurrency": "USD",
+    "risk_free": 0,
+    "Leverage": 1,
+    "allowShortSell": true,
+    "dataset": 60,
+    "isPositionBaseEnv": false,
+    "isNewsFeedOn": false,
+    "isEconstatFeedon": false,
+    "isWeatherFeedOn": false
+  },
+  "params": {
+    "lookback_h4": 42,
+    "entry_z": 2,
+    "exit_z": 0.4,
+    "stop_basis": 0.0075,
+    "max_hold_hours": 36,
+    "max_abs_basis": 0.025,
+    "max_h1_divergence": 0.006,
+    "max_daily_move": 0.06,
+    "min_edge": 0.002,
+    "gross_pair": 0.1,
+    "min_pair_notional": 1000,
+    "min_half_life": 0.75,
+    "max_half_life": 24,
+    "use_ou_gate": false,
+    "cooldown_hours": 18,
+    "stop_cooldown_hours": 48,
+    "max_h1_leg_move": 0.03,
+    "fee_rate": 0.0005,
+    "min_net_expected_profit_usd": 50,
+    "max_recent_h1_basis_jump": 0.006,
+    "max_recent_4h_basis_range": 0.012
+  },
+  "diagnostic": {
+    "years": [
+      "2021",
+      "2022",
+      "2023",
+      "2024",
+      "2025"
+    ],
+    "pairs": [
+      "BTC",
+      "ETH"
+    ],
+    "capture": [
+      "SYNC_H1",
+      "H4_EVENT",
+      "HISTORY_OK",
+      "HISTORY_*",
+      "REGIME_UNSAFE",
+      "BASIS_SHOCK",
+      "ZSCORE_SMALL",
+      "EDGE_SMALL",
+      "BASIS_OUTLIER",
+      "H1_DIVERGENCE",
+      "H1_PRICE_SHOCK",
+      "ZERO_QUANTITY",
+      "SMALL_NOTIONAL",
+      "HEDGE_IMBALANCE",
+      "PERCENT_COST_EDGE",
+      "ENTRY_SENT",
+      "FILL_OPEN",
+      "FILL_CLOSE"
+    ],
+    "final_log": "DIAG_FINAL",
+    "trade_logic_changed": false
+  },
+  "run_trigger": "2026-11-20-exp021-annual-funnel-diagnostic-once"
+}
