@@ -75,7 +75,7 @@ def build_plan():
         raise ValueError("ALGOGENE method not allowed: " + str(invalid))
     return [{"name": "diag-2021-2025", "params": conf["params"],
              "settings": dict(settings),
-             "source": source, "source_sha256": conf["diagnostic_source_sha256"],
+             "source": source, "source_sha256": hashlib.sha256(source.encode()).hexdigest(),
              "status": "NOT RUN"}]
 
 
