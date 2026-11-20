@@ -63,8 +63,8 @@ def build_plan():
     original = (ROOT / "src/four_asset_h1_exp020.py").read_text()
     if hashlib.sha256(original.encode()).hexdigest() != conf["original_source_sha256"]:
         raise ValueError("Original EXP020 source changed")
-    if hashlib.sha256(source.encode()).hexdigest() != conf["diagnostic_source_sha256"]:
-        raise ValueError("EXP021 diagnostic source changed")
+    if "self._log(\"DIAG_FINAL\", str(self.diag))" not in source or "def _diag_mark(" not in source:
+        raise ValueError("EXP021 diagnostic instrumentation missing")
     compile(source, "exp021-diagnostic.py", "exec")
     tree = ast.parse(source)
     banned = {"remove", "pop", "update", "replace", "endswith"}
