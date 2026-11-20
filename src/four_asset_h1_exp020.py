@@ -448,7 +448,16 @@ class AlgoEvent:
         if nav is None or free is None:
             self._log("NO_NAV_OR_BALANCE")
             return
+        # Platform native fee is zero; adjust strategic risk and sizing NAV
+        # by the cumulative ACTUAL proportional fill fees in this ledger.
+        nav -= self.fee_total
+        free -= self.fee_total
+        if nav <= 0 or free <= 0:
+            self._halt("COST_ADJUSTED_NAV_OR_BALANCE_NONPOSITIVE")
+            return
         confirmed_nav = _num(_get(ab, "NAV")) or _num(_get(ab, "nav"))
+        if confirmed_nav is not None:
+            confirmed_nav -= self.fee_total
         if confirmed_nav is not None:
             if self.peak_nav is None or confirmed_nav > self.peak_nav:
                 self.peak_nav = confirmed_nav
@@ -501,6 +510,12 @@ class AlgoEvent:
             item = self.cached[pair]
             if item is None or not item["regime"]["safe"]:
                 continue
+            shock = item["basis_risk"]
+            if (shock["max_h1_basis_jump"] > PARAMS["max_recent_h1_basis_jump"] or
+                    shock["h4_basis_range"] > PARAMS["max_recent_4h_basis_range"]):
+                self._log("SKIP_RECENT_BASIS_SHOCK", pair,
+                          round(shock["max_h1_basis_jump"], 6))
+                continue
             sig = item["signal"]
             if abs(sig["z"]) < PARAMS["entry_z"]:
                 continue
@@ -537,16 +552,28 @@ class AlgoEvent:
             if abs(ns - nf) / max(ns, nf) > 0.01:
                 self._log("SKIP_HEDGE_IMBALANCE", pair)
                 continue
-            # Economic edge filter, not an assertion of realized profit.
-            # $2 is the native fixed fee for opening both legs.
-            theoretical_move = min(ns, nf) * sig["edge"] - 2.0
-            if theoretical_move < PARAMS["min_expected_profit_usd"]:
-                self._log("SKIP_LOW_ECONOMIC_EDGE", pair)
+            # Use current quote, not stale H4 basis, for directional edge.
+            # Reserve the fees for 4 fills: open and close, spot and future.
+            side = -1 if sig["z"] > 0 else 1
+            current_edge = -side * (basis - sig["mean"])
+            estimated_4fill_fee = 2.0 * (ns + nf) * PARAMS["fee_rate"]
+            net_expected = min(ns, nf) * current_edge - estimated_4fill_fee
+            if current_edge <= 0 or net_expected < PARAMS["min_net_expected_profit_usd"]:
+                self._log("SKIP_PERCENT_COST_EDGE", pair, round(net_expected, 2))
                 continue
-            self._open(pair, q_s, q_f, -1 if sig["z"] > 0 else 1, now, basis)
+            self._open(pair, q_s, q_f, side, now, basis)
             # One pair per synchronized event: available margin is not yet
             # updated until native fills are accounted for.
             break
+
+        # One final cumulative ledger survives console retention truncation.
+        if (self.last_hour >= END and not self.cost_final_logged and
+                all(st["phase"] == "FLAT" for st in self.states.values())):
+            self.cost_final_logged = True
+            self._log("COST_FINAL", round(self.fee_total, 6),
+                      round(self.realized_gross, 6),
+                      round(self.realized_gross - self.fee_total, 6),
+                      self.fee_events, str(self.fee_by_year))
 
     def on_marketdatafeed(self, md, ab):
         pass
