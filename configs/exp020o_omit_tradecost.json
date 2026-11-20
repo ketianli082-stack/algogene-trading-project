@@ -1,0 +1,89 @@
+{
+  "experiment": "EXP-020O",
+  "version": "Same exact submitted EXP020 code, omit TradeCost key entirely from platform API payload",
+  "intent": "User-requested test whether omitting TradeCost rather than 0 or string 0.0 leads to effective native zero.",
+  "exp020_source_sha256": "4c2ff67079b9a2feb3d96df7d6ca05c5c30e67fb4ea914deed5b55036a330b6a",
+  "settings": {
+    "strategyName": "EXP020O omitted TradeCost probe 2025",
+    "subscribeList": [
+      "BTCUSD",
+      "BTCUSDM",
+      "ETHUSD",
+      "ETHUSDM"
+    ],
+    "StartDate": "2025-01",
+    "EndDate": "2025-12",
+    "InitialCapital": 1000000,
+    "BaseCurrency": "USD",
+    "risk_free": 0,
+    "Leverage": 1,
+    "allowShortSell": true,
+    "dataset": 60,
+    "isPositionBaseEnv": false,
+    "isNewsFeedOn": false,
+    "isEconstatFeedon": false,
+    "isWeatherFeedOn": false
+  },
+  "baseline_params": {
+    "lookback_h4": 42,
+    "entry_z": 2,
+    "exit_z": 0.4,
+    "stop_basis": 0.0075,
+    "max_hold_hours": 36,
+    "max_abs_basis": 0.025,
+    "max_h1_divergence": 0.006,
+    "max_daily_move": 0.06,
+    "min_edge": 0.002,
+    "gross_pair": 0.1,
+    "min_pair_notional": 1000,
+    "min_half_life": 0.75,
+    "max_half_life": 24,
+    "use_ou_gate": false,
+    "cooldown_hours": 18,
+    "stop_cooldown_hours": 48,
+    "max_h1_leg_move": 0.03,
+    "fee_rate": 0.0005,
+    "min_net_expected_profit_usd": 50,
+    "max_recent_h1_basis_jump": 0.006,
+    "max_recent_4h_basis_range": 0.012
+  },
+  "candidates": [
+    {
+      "name": "omit-tradecost-2025",
+      "start": "2025-01",
+      "end": "2025-12",
+      "params": {
+        "lookback_h4": 42,
+        "entry_z": 2,
+        "exit_z": 0.4,
+        "stop_basis": 0.0075,
+        "max_hold_hours": 36,
+        "max_abs_basis": 0.025,
+        "max_h1_divergence": 0.006,
+        "max_daily_move": 0.06,
+        "min_edge": 0.002,
+        "gross_pair": 0.1,
+        "min_pair_notional": 1000,
+        "min_half_life": 0.75,
+        "max_half_life": 24,
+        "use_ou_gate": false,
+        "cooldown_hours": 18,
+        "stop_cooldown_hours": 48,
+        "max_h1_leg_move": 0.03,
+        "fee_rate": 0.0005,
+        "min_net_expected_profit_usd": 50,
+        "max_recent_h1_basis_jump": 0.006,
+        "max_recent_4h_basis_range": 0.012
+      }
+    }
+  ],
+  "strict_validity_rule": "Do not accept zero by omission; require native effective_settings.TradeCost exactly numeric 0.0. Else INVALID_REVIEW. No refund or fee replacement.",
+  "fee_rate": 0.0005,
+  "controls": [
+    "User explicitly requested remove TradeCost field, not set it to 0",
+    "Same 2025 window, original EXP020 code SHA frozen",
+    "Never retry native POST or overwrite prior EXP020 results",
+    "Keep native Score_Total separate from in-strategy 0.05% shadow fee ledger"
+  ],
+  "trigger": "2026-11-20-exp020o-omit-tradecost-from-api-settings-run-001"
+}
