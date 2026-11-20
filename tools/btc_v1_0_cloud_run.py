@@ -131,7 +131,7 @@ def main():
         result = call("/run_backtest", {"code": code, "settings": settings}, post=True)
         if result.get("status") is not True:
             evidence.update(status="REJECTED", reason="Platform rejected submission",
-                            "response": redact(result, secrets))
+                            response=redact(result, secrets))
             save()
             return 1
         runtime_id = result.get("runtime_id")
