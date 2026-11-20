@@ -22,7 +22,7 @@ class EXP020RunGuards(unittest.TestCase):
         self.assertEqual(r["settings"]["Leverage"],1)
         self.assertEqual(r["params"]["fee_rate"],0.0005)
         self.assertIn("COST_FINAL",r["source"])
-        self.assertNotIn("EXP018",r["source"])
+        self.assertIn('self.evt.consoleLog("EXP020", *args)',r["source"])
 
     def test_safe_native_submission_and_both_fee_accounts(self):
         s=p.read_text()
