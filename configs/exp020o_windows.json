@@ -119,5 +119,6 @@
     "immutable_archive": "experiments/EXP-020O-WINDOWS/runs",
     "result_reporting": "per-window native score, effective fee, shadow fee, gross and net, diagnostic issues"
   },
-  "run_trigger": "2026-11-20-exp020o-two-date-windows-user-request-initial"
+  "run_trigger": "2026-11-20-exp020o-recover-only-2021-2025-after-task-preflight-http400",
+  "recovery_scope": "ONLY omit-tradecost-2021-2025; retain original source and 0.05% fee; never resubmit 2023-2025"
 }
