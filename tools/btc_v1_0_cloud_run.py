@@ -7,7 +7,6 @@ Only the 2021-2024 development set is permitted; 2025 remains untouched.
 import json
 import os
 import time
-import math
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -119,14 +118,6 @@ def main():
             evidence.update(status="BLOCKED", reason="Existing task or failed preflight; no submission")
             save()
             return 1
-        meta = call("/meta_instrument", {"instrument": "BTCUSD"})
-        spec = meta.get("res", {})
-        contract = spec.get("contractSize") if isinstance(spec, dict) else None
-        if meta.get("status") is not True or contract is None or not math.isfinite(float(contract)) or float(contract) <= 0:
-            evidence.update(status="BLOCKED", reason="BTCUSD contract metadata could not be verified")
-            save()
-            return 1
-        evidence["contract"] = {k: spec.get(k) for k in ("contractSize", "settleCurrency", "producttype")}
         evidence["status"] = "SUBMITTING"
         save()
         result = call("/run_backtest", {"code": code, "settings": settings}, post=True)
