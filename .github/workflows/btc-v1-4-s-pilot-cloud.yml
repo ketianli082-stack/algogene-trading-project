@@ -1,0 +1,40 @@
+name: BTC V1.4-S - Native Fixed Cost Pilot
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/btc-v1-4-s-pilot-cloud.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: btc-algogene-cloud-exclusive
+  cancel-in-progress: false
+jobs:
+  fee_pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 160
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile code and run offline tests
+        run: |
+          python -m py_compile strategy/btc_v1_4_a_risk60.py tools/btc_v1_4_s_pilot_cloud_run.py
+          python -m unittest discover -s tests -p 'test_btc_v1_4_a.py' -v
+      - name: Submit matched 2024 native fee diagnostic backtests
+        env:
+          ALGOGENE_USER_ID: ${{ secrets.ALGOGENE_USER_ID }}
+          ALGOGENE_API_KEY: ${{ secrets.ALGOGENE_API_KEY }}
+        run: python -u tools/btc_v1_4_s_pilot_cloud_run.py
+      - name: Retain redacted platform evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-v1-4-s-pilot-${{ github.run_id }}-${{ github.run_attempt }}
+          path: outputs/btc_v1_4_s_pilot/evidence.json
+          if-no-files-found: warn
+          retention-days: 90
