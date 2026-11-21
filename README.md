@@ -1,3 +1,16 @@
+# ALGOGENE BTC 单资产趋势交易研究
+
+当前 BTC 研究：EMA20/50 → ADX 趋势过滤 → ATR 风险退出 → 市场状态 / 仓位管理 → LLM 增量实验。2021–2024 开发，2025 保留检验。
+
+- [完整 BTC 研究路线](experiments/BTC_research_roadmap.md)
+- [V1.0–V1.1 回测比较、亏损诊断及成本敏感性](experiments/BTC-V1.1_results_and_loss_analysis.md)
+- [V1.2-B 策略代码](strategy/btc_v1_2_b_atr60.py)：ADX25 + 3 倍 ATR14 固定止损
+- [V1.2-B 独立 Action](../../actions/workflows/btc-v1-2-b-cloud.yml)
+
+以下保留此前基差研究记录，不作为当前 BTC 趋势策略的绩效证据。
+
+---
+
 # ALGOGENE BTC/ETH 现货—永续合约基差均值回归策略
 
 ## 新研究主线
