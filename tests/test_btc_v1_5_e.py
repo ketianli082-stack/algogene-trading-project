@@ -189,7 +189,7 @@ class TestRecoveryDiagnostic(unittest.TestCase):
         x.arm(1,datetime(2022,1,1))
         with patch.object(botmod,"ema_series",side_effect=lambda values,n:[0,1] if n==20 else [0,0]):
             # last two prices go from below to above fast EMA.
-            values=[0]*58+[0.5,2]
+            values=[0]*58+[-1,2]
             self.assertEqual(x.explain(datetime(2022,1,2),values),"ELIGIBLE")
         # Pure diagnostic helper may use a different EMA-series mock from real eligibility.
     def test_no_direction_short(self):
