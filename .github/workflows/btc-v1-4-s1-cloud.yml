@@ -1,0 +1,40 @@
+name: BTC V1.4-S1 - Cost-aware Entry Cloud Backtest
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/btc-v1-4-s1-cloud.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: btc-algogene-cloud-exclusive
+  cancel-in-progress: false
+jobs:
+  cost_filter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 85
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile code and run offline tests
+        run: |
+          python -m py_compile strategy/btc_v1_4_s1_costfilter60.py tools/btc_v1_4_s1_cloud_run.py
+          python -m unittest discover -s tests -p 'test_btc_v1_4_s1.py' -v
+      - name: Submit cost-aware entry native ALGOGENE backtest
+        env:
+          ALGOGENE_USER_ID: ${{ secrets.ALGOGENE_USER_ID }}
+          ALGOGENE_API_KEY: ${{ secrets.ALGOGENE_API_KEY }}
+        run: python -u tools/btc_v1_4_s1_cloud_run.py
+      - name: Retain redacted platform evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-v1-4-s1-costfilter-${{ github.run_id }}-${{ github.run_attempt }}
+          path: outputs/btc_v1_4_s1/evidence.json
+          if-no-files-found: warn
+          retention-days: 90
