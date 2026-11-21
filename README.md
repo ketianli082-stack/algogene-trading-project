@@ -5,7 +5,7 @@
 - [完整策略机制、交易流程与实验安排（统一入口）](experiments/BTC_完整策略机制与实验安排.md)
 - [S1 成本感知入场](experiments/BTC-V1.4-S1_cost_aware_entry.md) / [S2 成本感知仓位](experiments/BTC-V1.4-S2_cost_aware_sizing.md)
 - [V1.5 活跃度、多空双向与止损后重新入场实验设计](experiments/BTC-V1.5_activeness_long_short_reentry.md)
-- [V1.5 A–D 正式绩效分析、空头/重入问题与 E–H 后续方案](experiments/BTC-V1.5_results_and_next_experiments.md)
+- [V1.5 A–D 结果、震荡期识别与 E–H 更新实验路线](experiments/BTC-V1.5_results_and_next_experiments.md)
 - [完整 BTC 研究路线](experiments/BTC_research_roadmap.md)
 - [V1.0–V1.1 回测比较、亏损诊断及成本敏感性](experiments/BTC-V1.1_results_and_loss_analysis.md)
 - [V1.2-B 策略代码](strategy/btc_v1_2_b_atr60.py)：ADX25 + 3 倍 ATR14 固定止损
